@@ -84,6 +84,7 @@ export default function List() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeStoreId, setActiveStoreId] = useState<string | null>(null);
   // guards against opening a second confirm for the same row (e.g. a same-tick
@@ -258,6 +259,31 @@ export default function List() {
         confirmOpenRef.current = false;
       },
     });
+  };
+
+  // * every non-draft store, whatever the filters on this page say (#99)
+  const handleExport = async () => {
+    if (!idToken) return;
+    setExporting(true);
+    try {
+      const res = await authedFetch(idToken, "/api/admin/stores/export");
+      if (!res.ok) throw new Error("Failed to export stores");
+      const fileName =
+        res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ??
+        "bezold-sellers.csv";
+      const downloadUrl = URL.createObjectURL(await res.blob());
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = fileName;
+      anchor.click();
+      // * revoke on the next tick so the browser has picked the download up
+      setTimeout(() => URL.revokeObjectURL(downloadUrl));
+      messageApi.success(`已下載 ${res.headers.get("X-Row-Count")} 筆`);
+    } catch {
+      messageApi.error("下載失敗，請稍後再試");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleCopyLink = async (url: string) => {
@@ -529,6 +555,13 @@ export default function List() {
           onChange={(range) => setDateRange(range)}
           placeholder={["Created from", "Created to"]}
         />
+        <AntButton
+          onClick={handleExport}
+          loading={exporting}
+          disabled={!idToken}
+        >
+          下載所有店家資料（CSV）
+        </AntButton>
       </Space>
 
       {selectedIds.length > 0 && (
