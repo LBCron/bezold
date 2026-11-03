@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "seo:audit": "node scripts/seo-audit.mjs",
+    "test:unit": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/unit/*.test.ts",
     "test:rules": "firebase emulators:exec --only firestore,storage --project demo-bezold \"node --test --test-concurrency=1 tests/rules/*.test.ts\""
   },
   "dependencies": {

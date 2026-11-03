@@ -8,14 +8,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] `toStoreCsv(stores, { appUrl })` 回傳開頭是 BOM 的字串，換行用 CRLF，標題列的 30 個欄位順序和 SPEC 的表格一樣
-- [ ] 跳脫、空值、陣列 `|`、布林、台北時間 `YYYY-MM-DD HH:mm`、公式前綴 `'`（只加在自由文字欄位），都符合 SPEC
-- [ ] `exportFileName(now)` 用台北日期回傳 `bezold-sellers-YYYYMMDD.csv`
+- [x] `toStoreCsv(stores, { appUrl })` 回傳開頭是 BOM 的字串，換行用 CRLF，標題列的 30 個欄位順序和 SPEC 的表格一樣
+- [x] 跳脫、空值、陣列 `|`、布林、台北時間 `YYYY-MM-DD HH:mm`、公式前綴 `'`（只加在自由文字欄位），都符合 SPEC
+- [x] `exportFileName(now)` 用台北日期回傳 `bezold-sellers-YYYYMMDD.csv`
 
 **Verification:**
 
-- [ ] `npm run test:unit` 通過，涵蓋 SPEC T1 列出的每一種情況
-- [ ] `npx prettier --write`、lint 0 錯誤
+- [x] `npm run test:unit` 通過，涵蓋 SPEC T1 列出的每一種情況
+- [x] `npx prettier --write`、lint 0 錯誤
 
 **Dependencies:** None
 

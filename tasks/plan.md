@@ -18,7 +18,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md) · Issue: [v-
 
 ### Phase 1: CSV 產生器（風險最高的部分先做）
 
-- [ ] Task 1: `utils/storeCsv.ts` + 單元測試 + `test:unit` script
+- [x] Task 1: `utils/storeCsv.ts` + 單元測試 + `test:unit` script
 
 ### Phase 2: API
 
