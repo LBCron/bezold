@@ -13,8 +13,8 @@ import styles from "./DigitalHolderCard.module.css";
 const LINE_SUPPORT_URL = "https://line.me/ti/p/~bezoldtw";
 
 // * digital assets are anonymous: no seller name, no contact gate. Buyers
-// * apply through the platform, which matches both sides before anything
-// * about the seller or the asset itself is revealed.
+// * apply through the platform and pay the 賣家資料解鎖費 before Bezold
+// * shares the seller's screenshots, asset link and contact details.
 export default function DigitalHolderCard({ store }: { store: Store }) {
   const { price, priceMax, priceNegotiable, tags } = store;
   const isSold = store.status === STORE_STATUS.SOLD;
@@ -29,12 +29,12 @@ export default function DigitalHolderCard({ store }: { store: Store }) {
         <div>
           <div className={priceCardStyles.sellerName}>
             數位資產持有人
-            <small>詳細營運與聯絡資料需經同意後提供</small>
+            <small>支付賣家資料解鎖費後，提供後台截圖與賣家聯絡方式</small>
           </div>
           <div className={priceCardStyles.badges}>
             <span className={priceCardStyles.badge}>
               <span className={priceCardStyles.dot} />
-              平台媒合
+              付費查看
             </span>
             {isUrgent && (
               <span className={cn(priceCardStyles.badge, priceCardStyles.warm)}>

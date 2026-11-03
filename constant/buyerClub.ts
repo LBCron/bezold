@@ -29,15 +29,15 @@ export const BUYER_CLUB_COPY = {
 export const BUYER_CLUB_DIGITAL_COPY: typeof BUYER_CLUB_COPY = {
   asideTitle: ["加入後", "就能送出申請"],
   asideLede:
-    "數位資產採匿名刊登，不公開賣家資料。加入是免費的，完成後即可送出申請，由 Bezold 確認雙方條件後再為你們牽線。",
+    "數位資產採匿名刊登，不公開賣家資料。加入是免費的，完成後即可送出申請；支付賣家資料解鎖費後，就能收到後台截圖和賣家聯絡方式。",
   benefits: [
-    "送出申請，平台確認後為雙方牽線",
+    "送出申請，付解鎖費後取得賣家資料",
     "Bezold 不會向你索取密碼或驗證碼",
     "免費加入 · 隨時取消",
   ],
   submit: "免費加入，再送出申請 →",
   submitLoading: "建立中…",
-  verifyContext: "驗證信箱後就能送出申請，平台確認後會與你聯繫",
+  verifyContext: "驗證信箱後就能送出申請，Bezold 會私訊你後續步驟",
 };
 
 // * buyer-club only: a buyer may be looking for a digital asset, but a

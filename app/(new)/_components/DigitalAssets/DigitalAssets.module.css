@@ -78,3 +78,34 @@
     opacity: 0.8;
   }
 }
+
+/* pre-launch teaser — remove with it after launch */
+.teaserIntro {
+  margin: 0 0 10px;
+  font-family: var(--hand);
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.teaserPoints {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  font-family: var(--hand);
+  font-size: 14px;
+  color: var(--ink-2);
+
+  & li {
+    display: flex;
+    gap: 8px;
+  }
+
+  & li::before {
+    content: "✓";
+    flex-shrink: 0;
+    color: var(--accent-2);
+    font-weight: 700;
+  }
+}

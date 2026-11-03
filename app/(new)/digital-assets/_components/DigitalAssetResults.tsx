@@ -9,6 +9,7 @@ import Dropdown from "@/components/refactored/Dropdown";
 import SellCtaLink from "@/app/(new)/_components/SellCtaLink";
 import {
   DIGITAL_ASSET_TYPES,
+  DIGITAL_ASSETS_SUBTITLE,
   TRANSFER_RISK_NOTICE,
 } from "@/constant/digitalAsset";
 import { type DigitalAssetTab, ALL_DIGITAL_ASSET_TYPES } from "@/types";
@@ -70,9 +71,7 @@ export default function DigitalAssetResults({
           <h1 className={styles.title}>
             數位資產頂讓 <em>共 {approvedCount} 件</em>
           </h1>
-          <p className={styles.sub}>
-            電商、社群、網站、App……匿名刊登，送出申請後由平台確認雙方再牽線。
-          </p>
+          <p className={styles.sub}>{DIGITAL_ASSETS_SUBTITLE}</p>
         </div>
       </div>
 

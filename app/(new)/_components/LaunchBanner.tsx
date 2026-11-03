@@ -1,12 +1,8 @@
-import styles from "./LaunchBanner.module.css";
+import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
+import LaunchBannerRotator from "./LaunchBannerRotator";
 
+// * many pages are statically built, so the rotator re-checks the launch in
+// * the browser — this is only its starting point
 export default function LaunchBanner() {
-  return (
-    <div className={styles.launch}>
-      <span className={styles.tag}>EARLY BIRD</span>
-      <b>開站慶 · 前 3 個月免費刊登</b>
-      <span className={styles.soft}>— 早鳥用戶享連續優惠 ·</span>
-      <a href="/sell">了解 →</a>
-    </div>
-  );
+  return <LaunchBannerRotator serverLaunched={isDigitalAssetsLaunched()} />;
 }

@@ -1,0 +1,115 @@
+.card {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 4px 4px 0 var(--ink);
+  overflow: hidden;
+}
+
+.dateBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* mono like the card ribbons; the handwriting font slants Latin caps */
+.kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--accent-3);
+}
+
+.date {
+  font-family: var(--display);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 0.9;
+}
+
+.weekday {
+  font-family: var(--hand);
+  font-size: 15px;
+}
+
+.countdown {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.unit {
+  min-width: 46px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.unitValue {
+  display: block;
+  font-size: 18px;
+}
+
+.body {
+  padding: 20px 22px;
+}
+
+.ctaPrimary,
+.ctaGhost {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 var(--ink);
+  font-family: var(--hand);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+
+  &:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+}
+
+.ctaPrimary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.ctaGhost {
+  background: #fff;
+  color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dateBlock {
+    padding: 18px;
+  }
+
+  .date {
+    font-size: 52px;
+  }
+
+  .body {
+    padding: 18px;
+  }
+}

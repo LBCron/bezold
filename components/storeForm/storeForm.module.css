@@ -233,6 +233,19 @@
   margin: 0.125rem 0 0;
 }
 
+/* /sell 數位資產 before launch — remove with the teaser */
+.earlyNote {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1.5px solid var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 8%, var(--paper));
+  font-family: var(--hand);
+  font-size: 0.84375rem;
+  font-weight: 700;
+  line-height: 1.55;
+  color: var(--accent-2);
+}
+
 .errorMsg {
   font-family: var(--hand);
   font-size: 0.875rem;

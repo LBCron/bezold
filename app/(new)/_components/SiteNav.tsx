@@ -2,6 +2,8 @@ import Logo from "./Logo";
 import Link from "@/components/refactored/Link";
 import SellButton from "./SellButton";
 import NavAuthStatus from "./NavAuthStatus";
+import NavLaunchBadge from "./NavLaunchBadge";
+import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -14,6 +16,8 @@ const navLinks = [
 ];
 
 export default function SiteNav({ activeLink }: { activeLink?: string }) {
+  const digitalAssetsLaunched = isDigitalAssetsLaunched();
+
   return (
     <nav
       className={cn(
@@ -35,6 +39,10 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
           {navLinks.map(({ label, href }) => (
             <Link href={href} key={label} active={label === activeLink}>
               {label}
+              {/* desktop row only — the mobile row has no room for it */}
+              {href === "/digital-assets" && (
+                <NavLaunchBadge serverLaunched={digitalAssetsLaunched} />
+              )}
             </Link>
           ))}
         </ul>

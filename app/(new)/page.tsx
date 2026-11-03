@@ -27,6 +27,7 @@ import {
 } from "@/firebase/serverUtils/store";
 import { STORE_STATUS } from "@/types";
 import { SOCIAL_LINKS } from "@/constant/socials";
+import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 
 export const revalidate = 60;
 
@@ -42,17 +43,22 @@ export const metadata: Metadata = {
 };
 
 export default async function NewHomePage() {
+  // * re-checked on every revalidate, so 04 switches within a minute of launch
+  const digitalAssetsLaunched = isDigitalAssetsLaunched();
   const [highlightedStores, emergencyStores, soldStores, digitalAssets] =
     await Promise.all([
       getHighlightedStores(),
       getEmergencyStores(),
       getSoldStores(),
-      // * one grid's worth — filtering by type lives on /digital-assets
-      getDigitalAssets({
-        statuses: [STORE_STATUS.APPROVED],
-        limit: 6,
-        coverOnly: true,
-      }),
+      // * one grid's worth — filtering by type lives on /digital-assets.
+      // * Before launch 04 is a teaser, so skip the query.
+      digitalAssetsLaunched
+        ? getDigitalAssets({
+            statuses: [STORE_STATUS.APPROVED],
+            limit: 6,
+            coverOnly: true,
+          })
+        : Promise.resolve([]),
     ]);
 
   return (
@@ -130,7 +136,10 @@ export default async function NewHomePage() {
           sub="— 這些店家已成功頂讓 —"
           more=""
         />
-        <DigitalAssets assets={digitalAssets} />
+        <DigitalAssets
+          assets={digitalAssets}
+          launched={digitalAssetsLaunched}
+        />
         <Categories />
         <Districts />
         <BrowseAll />

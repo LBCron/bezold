@@ -37,6 +37,7 @@ import {
   DIGITAL_ASSET_EMPTY_LOCATION,
   digitalAssetWriteFields,
 } from "@/utils/store";
+import { digitalAssetsLaunchLabels } from "@/utils/digitalAsset";
 
 const LISTING_TYPE_OPTIONS: {
   value: ListingType;
@@ -49,9 +50,12 @@ const LISTING_TYPE_OPTIONS: {
 
 export default function SellForm({
   initialListingType = LISTING_TYPE.PHYSICAL,
+  digitalAssetsLaunched,
 }: {
   /** From /sell?type=digital — the seller can still switch before submitting. */
   initialListingType?: ListingType;
+  /** Decided by the server page; before launch 數位資產 shows the 搶先刊登 note. */
+  digitalAssetsLaunched: boolean;
 }) {
   const router = useRouter();
   const [authUser, setAuthUser] = useState<FirebaseUser | null>(null);
@@ -273,6 +277,8 @@ export default function SellForm({
           </div>
         </div>
 
+        {isDigital && !digitalAssetsLaunched && <EarlyListingNote />}
+
         {isDigital ? (
           <DigitalFieldsSection store={store} onChange={setStoreField} />
         ) : (
@@ -327,5 +333,15 @@ export default function SellForm({
         </div>
       </form>
     </Card>
+  );
+}
+
+function EarlyListingNote() {
+  const { date, weekday, time } = digitalAssetsLaunchLabels();
+  return (
+    <p className={styles.earlyNote}>
+      ✦ 搶先刊登：數位資產頂讓 {date}（{weekday}）{time}
+      正式上線。現在送出、審核通過的刊登，會在上線當天一起曝光。刊登免費，賣家資料解鎖費由潛在買家支付。
+    </p>
   );
 }

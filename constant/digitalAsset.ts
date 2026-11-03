@@ -3,6 +3,10 @@ import {
   type DigitalAssetType,
 } from "@/types/DigitalAsset";
 
+// * official 數位資產頂讓 launch (Taipei time). Before it, the entry points
+// * show a teaser; at this moment they switch on their own — no deploy needed.
+export const DIGITAL_ASSETS_LAUNCH_AT = "2026-10-29T22:00:00+08:00";
+
 // * display order of the type tabs / pills
 export const DIGITAL_ASSET_TYPES: { key: DigitalAssetType; label: string }[] = [
   { key: DIGITAL_ASSET_TYPE.SOCIAL, label: "社群" },
@@ -19,6 +23,10 @@ export const DIGITAL_ASSET_TYPE_LABEL = Object.fromEntries(
   DIGITAL_ASSET_TYPES.map(({ key, label }) => [key, label]),
 ) as Record<DigitalAssetType, string>;
 
+// * /digital-assets header line, on both the list and the pre-launch teaser
+export const DIGITAL_ASSETS_SUBTITLE =
+  "電商、社群、網站、App……匿名刊登，每筆都經 Bezold 核對營收截圖；有興趣可在刊登頁申請查看賣家資料。";
+
 // * fixed caption under every 平均月營收 figure — sellers can't edit it
 export const REVENUE_DISCLAIMER = "賣家提供，未經 Bezold 查核";
 
@@ -29,8 +37,12 @@ export const TRANSFER_RISK_NOTICE =
 
 export const DIGITAL_TRANSFER_NOTES: { title: string; body: string }[] = [
   {
-    title: "分階段揭露詳細資料",
-    body: "公開頁面只顯示概要。買家送出申請後，由 Bezold 確認雙方意願，再依序提供營運數據與聯絡資料。",
+    title: "付費查看詳細資料",
+    body: "公開頁面只顯示概要。潛在買家支付賣家資料解鎖費（價格下限的 0.5%，最低 500 元、最多 5,000 元）後，Bezold 會私訊提供後台截圖、資產連結和賣家聯絡方式，由雙方自行洽談。",
+  },
+  {
+    title: "解鎖費不保證成交",
+    body: "賣家資料解鎖費不是仲介費，原則上不退費。Bezold 不介入雙方交易，也不保證成交。",
   },
   {
     title: "移轉範圍需雙方確認",
@@ -46,11 +58,11 @@ export const DIGITAL_TRANSFER_NOTES: { title: string; body: string }[] = [
   },
 ];
 
-export const VERIFICATION_IMAGE_TITLE = "營收與數據核對截圖（必填，不公開）";
+export const VERIFICATION_IMAGE_TITLE = "營收與數據截圖（必填）";
 
 export const VERIFICATION_IMAGE_GUIDE = [
   "請上傳後台的營收報表或數據截圖。例如蝦皮賣家中心的月營收、Shopify／電商後台的訂單報表、FB 社團洞察報告、GA 流量、App 下載數。",
   "截圖要看得到帳號或賣場名稱，方便我們對應你填的資產連結。",
-  "只有 Bezold 管理員看得到，用來核對資料、防止詐騙刊登，不會出現在公開頁面。",
+  "不會出現在公開頁面。Bezold 用來核對資料；潛在買家支付賣家資料解鎖費後，也會收到這些截圖（費用由潛在買家付，刊登免費）。",
   "請遮住個資，不要截到密碼或驗證碼。",
 ];

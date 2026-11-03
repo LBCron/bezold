@@ -113,7 +113,49 @@ export default function TermsPage() {
         </Section>
 
         <Section variant="alt">
-          <SectionTitle num="06" title="智慧財產權" />
+          <SectionTitle num="06" title="數位資產賣家資料解鎖費" />
+          <LegalProse>
+            <ol>
+              <li>
+                <b>適用範圍：</b>本條適用於本平台「數位資產頂讓」類別之刊登。
+              </li>
+              <li>
+                <b>費用：</b>
+                買家申請取得數位資產刊登之詳細資料時，應由買家支付賣家資料解鎖費。金額為該刊登價格之百分之零點五（0.5%）；價格為區間者，以區間下限計算。每筆刊登最低新臺幣
+                500 元、最高新臺幣 5,000 元；未標示價格（面議）之刊登，以新臺幣
+                500 元計。
+              </li>
+              <li>
+                <b>付款：</b>本平台以私訊與買家約定付款方式（例如 LINE
+                轉帳），於確認收款後提供資料。
+              </li>
+              <li>
+                <b>提供內容：</b>
+                賣家提供予本平台之後台營收或數據截圖、資產連結，以及賣家聯絡方式。
+              </li>
+              <li>
+                <b>費用性質：</b>
+                賣家資料解鎖費為取得前款資料之對價，非仲介費、服務費或交易保證金。本平台不介入買賣雙方之洽談、交易及移轉，亦不保證成交。前款資料由賣家提供，本平台僅核對截圖與資產連結之對應，不保證其內容正確、完整。
+              </li>
+              <li>
+                <b>退費：</b>
+                賣家資料解鎖費原則上不予退還。經本平台查證，所提供資料與實際情況顯著不符者，本平台得退還已付費用，但應扣除新臺幣
+                500 元之作業費用；已付金額為新臺幣 500 元者，不予退還。
+              </li>
+              <li>
+                <b>保密：</b>
+                買家取得之資料僅供評估該筆交易使用，不得轉傳、公開或作其他用途。違反者，本平台得停止其帳號使用，並保留法律追訴權。
+              </li>
+              <li>
+                <b>賣家：</b>
+                賣家刊登數位資產免費，本條費用概不向賣家收取。賣家刊登數位資產，即同意本平台將其提供之截圖、資產連結及聯絡方式，提供予已支付賣家資料解鎖費之買家。
+              </li>
+            </ol>
+          </LegalProse>
+        </Section>
+
+        <Section variant="default">
+          <SectionTitle num="07" title="智慧財產權" />
           <LegalProse>
             <p>
               本平台之名稱、商標、標誌、設計、介面及全部內容，其智慧財產權歸
@@ -125,8 +167,8 @@ export default function TermsPage() {
           </LegalProse>
         </Section>
 
-        <Section variant="default">
-          <SectionTitle num="07" title="服務變更與中斷" />
+        <Section variant="alt">
+          <SectionTitle num="08" title="服務變更與中斷" />
           <LegalProse>
             <p>
               本平台保留隨時修改、暫停或終止部分或全部服務之權利。若屬重大變更，將提前至少{" "}
@@ -138,8 +180,8 @@ export default function TermsPage() {
           </LegalProse>
         </Section>
 
-        <Section variant="alt">
-          <SectionTitle num="08" title="條款修改" />
+        <Section variant="default">
+          <SectionTitle num="09" title="條款修改" />
           <LegalProse>
             <p>
               本平台得視業務需要修改本服務條款，修改後將於平台公告。
@@ -149,8 +191,8 @@ export default function TermsPage() {
           </LegalProse>
         </Section>
 
-        <Section variant="default">
-          <SectionTitle num="09" title="準據法與管轄" />
+        <Section variant="alt">
+          <SectionTitle num="10" title="準據法與管轄" />
           <LegalProse>
             <p>
               本服務條款之解釋與適用，以<b>中華民國法律</b>為準據法。

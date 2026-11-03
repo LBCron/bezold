@@ -182,7 +182,8 @@ export default function DigitalFieldsSection({
           onChange={(event) => onChange("assetUrl", event.target.value)}
         />
         <p className={styles.readonlyNote}>
-          只有 Bezold 管理員看得到，用來查核，不會出現在公開頁面。
+          不會出現在公開頁面。Bezold
+          用來查核；潛在買家支付賣家資料解鎖費後，也會收到這個連結。
         </p>
         <p className={styles.warning} role="note">
           {NO_CREDENTIALS_WARNING}

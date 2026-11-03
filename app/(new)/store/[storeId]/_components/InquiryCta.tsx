@@ -198,7 +198,8 @@ export default function InquiryCta({ storeId }: { storeId: string }) {
       )}
 
       <p className={styles.note}>
-        由平台確認後與你聯繫。送出不代表承諾購買，也不會立即揭露賣家聯絡資料。
+        送出後 Bezold
+        會私訊你賣家資料解鎖費的金額和付款方式。付款後即可收到後台截圖和賣家聯絡方式；解鎖費不保證成交。
       </p>
     </div>
   );

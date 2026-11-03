@@ -1,22 +1,48 @@
+/* One message at a time: the active one sits in place, the leaving one slides
+   up and out, the rest wait below (without a transition, so they never sweep
+   through the visible strip). */
 .launch {
+  position: relative;
+  height: 40px;
+  overflow: hidden;
   background: var(--accent);
   color: #fff;
-  padding: 8px 28px;
   border-bottom: 1.5px solid var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: wrap;
   font-family: var(--hand);
   font-size: 13px;
 }
-.launch b {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
+
+.item {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 44px;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+  transform: translateY(100%);
+  opacity: 0;
+
+  &.active,
+  &.leaving {
+    transition:
+      transform 0.45s ease,
+      opacity 0.45s ease;
+  }
+
+  &.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  &.leaving {
+    transform: translateY(-100%);
+  }
 }
+
 .tag {
   background: #fff;
   color: var(--accent);
@@ -28,12 +54,90 @@
   font-weight: 700;
   letter-spacing: 0.1em;
 }
-.launch a {
-  color: #fff;
+
+.tagMus {
+  background: var(--accent-3);
+  color: var(--ink);
+}
+
+.text {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cta {
   text-decoration: underline wavy var(--accent-3);
   text-underline-offset: 3px;
-  cursor: pointer;
 }
-.soft {
-  opacity: 0.85;
+
+.short {
+  display: none;
+}
+
+/* 18px hit area around a 6px dot */
+.dots {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+}
+
+.dot {
+  width: 16px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 6px;
+    margin: 0 auto;
+    border: 1px solid #fff;
+    border-radius: 50%;
+  }
+
+  &.dotOn::before {
+    background: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+  }
+}
+
+/* the long pre-launch message needs ~640px; leave room for wider fonts */
+@media (max-width: 720px) {
+  .item {
+    gap: 8px;
+    padding: 0 36px 0 12px;
+  }
+
+  .text {
+    font-size: 17px;
+  }
+
+  .long {
+    display: none;
+  }
+
+  .short {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    &.active,
+    &.leaving {
+      transition: none;
+    }
+  }
 }

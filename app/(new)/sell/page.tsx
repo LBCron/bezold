@@ -5,6 +5,7 @@ import SiteFooter from "@/app/(new)/_components/SiteFooter";
 import EmailVerifiedGate from "@/app/(new)/_components/EmailVerifiedGate";
 import SellForm from "./_components/SellForm";
 import { LISTING_TYPE } from "@/types";
+import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = pageMetadata({
@@ -46,6 +47,7 @@ export default function SellPage({
             initialListingType={
               isDigital ? LISTING_TYPE.DIGITAL : LISTING_TYPE.PHYSICAL
             }
+            digitalAssetsLaunched={isDigitalAssetsLaunched()}
           />
         </EmailVerifiedGate>
       </main>
