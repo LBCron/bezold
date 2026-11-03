@@ -22,20 +22,20 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md) · Issue: [v-
 
 ### Phase 2: API
 
-- [ ] Task 2: `GET /api/admin/stores/export`（讀取、權限、header、log）
+- [x] Task 2: `GET /api/admin/stores/export`（讀取、權限、header、log）
 
 ### Checkpoint: API
 
-- [ ] `npm run test:unit` 通過；curl 401／403／200 都正確；log 有 `admin_store_export`
+- [x] `npm run test:unit` 通過；curl 401／403／200 都正確；log 有 `admin_store_export`
 
 ### Phase 3: 後台按鈕
 
-- [ ] Task 3: 店家列表頁「下載所有店家資料（CSV）」按鈕
+- [x] Task 3: 店家列表頁「下載所有店家資料（CSV）」按鈕
 
 ### Checkpoint: Complete
 
-- [ ] SPEC T1–T7 全部通過；lint、build 通過
-- [ ] 停下讓你看過，再 commit、開 PR
+- [x] SPEC T1–T7 全部通過；lint、build 通過
+- [x] 停下讓你看過，再 commit、開 PR
 
 ## Risks and Mitigations
 
