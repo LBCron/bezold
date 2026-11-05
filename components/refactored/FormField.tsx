@@ -12,6 +12,7 @@ export default function FormField({
   onBlur,
   suffix,
   hint,
+  notice,
 }: {
   id: string;
   label: React.ReactNode;
@@ -23,12 +24,16 @@ export default function FormField({
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   suffix?: React.ReactNode;
   hint?: string;
+  /** Rendered between the label and the input — for warnings the user should
+   *  read before typing (the caller styles it). */
+  notice?: React.ReactNode;
 }) {
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor={id}>
         {label}
       </label>
+      {notice}
       <div className={styles.inputWrap}>
         <input
           className={cn(styles.input, suffix && styles.inputWithSuffix)}

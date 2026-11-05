@@ -131,8 +131,11 @@ export const getStoreById = async (storeId: string) => {
     return null;
   } else {
     const storeData = doc.data();
-    // TODO: might not get all images, only get the first one
-    const images = await getImagesByPath(storeData!.images);
+    // * every caller is public (store page + its metadata, /api/stores/[id]),
+    // * so digital-asset photos stay unsigned — admin reads them client-side
+    const images = isDigitalAsset(storeData as Store)
+      ? []
+      : await getImagesByPath(storeData!.images);
 
     let userData = undefined;
     if (storeData?.user) {
@@ -205,7 +208,6 @@ export const getSoldStores = async () => {
 interface GetDigitalAssetsOptions {
   statuses: StoreStatus[];
   limit?: number;
-  coverOnly?: boolean;
 }
 
 // * status is part of the query so hidden (pending / draft / rejected) assets
@@ -214,7 +216,6 @@ interface GetDigitalAssetsOptions {
 export const getDigitalAssets = async ({
   statuses,
   limit,
-  coverOnly,
 }: GetDigitalAssetsOptions): Promise<Store[]> => {
   try {
     const digitalRef = db
@@ -227,8 +228,9 @@ export const getDigitalAssets = async ({
     const orderedRef = statusRef.orderBy("createTime", "desc");
     const snapshot = await (limit ? orderedRef.limit(limit) : orderedRef).get();
 
-    // * images resolve after the limit, so only displayed covers are signed
-    return await resolveStoreImages(mapDocsToStores(snapshot), { coverOnly });
+    // * digital-asset photos are for Bezold review only — never sign a public
+    // * URL for them; cards fall back to their no-photo style
+    return mapDocsToStores(snapshot).map((store) => ({ ...store, images: [] }));
   } catch (error) {
     // * e.g. index not built yet — callers render their empty state, not a 500
     console.error("getDigitalAssets failed", error);

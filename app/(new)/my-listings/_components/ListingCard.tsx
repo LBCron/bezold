@@ -46,7 +46,7 @@ export default function ListingCard({ store }: { store: Store }) {
   const meta = isDigital
     ? (card.location ?? "")
     : [store.city, store.district, categoryLabel].filter(Boolean).join(" · ");
-  const thumbLabel = isDigital ? "封面圖" : "店面照";
+  const thumbLabel = isDigital ? "照片" : "店面照";
 
   const [status, setStatus] = useState(store.status ?? STORE_STATUS.PENDING);
   const [confirmingSold, setConfirmingSold] = useState(false);

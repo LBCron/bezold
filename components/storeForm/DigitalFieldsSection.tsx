@@ -1,8 +1,11 @@
 "use client";
 
+import { Fragment } from "react";
 import FormField from "@/components/refactored/FormField";
 import Pill from "@/components/refactored/Pill";
 import {
+  ASSET_DESCRIPTION_PUBLIC_WARNING,
+  ASSET_NAME_PUBLIC_WARNING,
   DIGITAL_ASSET_TYPES,
   NO_CREDENTIALS_WARNING,
 } from "@/constant/digitalAsset";
@@ -57,7 +60,8 @@ export default function DigitalFieldsSection({
       <FormField
         id="storeName"
         label="資產名稱"
-        placeholder="例：手作飾品蝦皮賣場＋FB 社團"
+        notice={<PublicWarning lines={ASSET_NAME_PUBLIC_WARNING} />}
+        placeholder="例：手作飾品電商＋社群"
         value={store.storeName}
         onChange={(event) => onChange("storeName", event.target.value)}
       />
@@ -93,6 +97,7 @@ export default function DigitalFieldsSection({
         <label className={styles.label} htmlFor="description">
           資產描述
         </label>
+        <PublicWarning lines={ASSET_DESCRIPTION_PUBLIC_WARNING} />
         <textarea
           id="description"
           className={styles.textarea}
@@ -190,5 +195,20 @@ export default function DigitalFieldsSection({
         </p>
       </div>
     </section>
+  );
+}
+
+// * one line per entry, above the input so the seller reads it before typing.
+// * <br> rather than block spans keeps the style's ⚠ on the first line
+function PublicWarning({ lines }: { lines: string[] }) {
+  return (
+    <p className={styles.warning} role="note">
+      {lines.map((line, index) => (
+        <Fragment key={line}>
+          {index > 0 && <br />}
+          {line}
+        </Fragment>
+      ))}
+    </p>
   );
 }

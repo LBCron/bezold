@@ -11,14 +11,12 @@ import styles from "./StoreGallery.module.css";
 interface StoreGalleryProps {
   images: string[];
   tags?: StoreTag[];
-  /** Digital assets have no storefront or kitchen — neutral slot labels. */
-  isDigital?: boolean;
 }
 
 // * empty-slot labels: the hero, then the four thumbnails
 const SLOT_LABELS = {
-  physical: { hero: "店面外觀", thumbs: ["內裝", "廚房", "設備", "其他"] },
-  digital: { hero: "封面圖", thumbs: ["頁面", "商品／服務", "內容", "其他"] },
+  hero: "店面外觀",
+  thumbs: ["內裝", "廚房", "設備", "其他"],
 };
 
 function Placeholder({ label }: { label: string }) {
@@ -29,13 +27,8 @@ function Placeholder({ label }: { label: string }) {
   );
 }
 
-export default function StoreGallery({
-  images,
-  tags,
-  isDigital = false,
-}: StoreGalleryProps) {
+export default function StoreGallery({ images, tags }: StoreGalleryProps) {
   const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
-  const labels = isDigital ? SLOT_LABELS.digital : SLOT_LABELS.physical;
   const slots = Array.from({ length: 5 }, (_, index) => images[index] ?? null);
   const totalImages = images.length;
 
@@ -61,12 +54,12 @@ export default function StoreGallery({
               <Image
                 src={slots[0]}
                 fill
-                alt={isDigital ? "資產封面圖" : "店面主圖"}
+                alt="店面主圖"
                 className={styles.img}
                 sizes="55vw"
               />
             ) : (
-              <Placeholder label={labels.hero} />
+              <Placeholder label={SLOT_LABELS.hero} />
             )}
             {isUrgent && <span className={styles.ribbon}>急售</span>}
             {totalImages > 0 && (
@@ -77,7 +70,7 @@ export default function StoreGallery({
           </div>
 
           {/* 4 thumbnails */}
-          {labels.thumbs.map((label, thumbIndex) => {
+          {SLOT_LABELS.thumbs.map((label, thumbIndex) => {
             const index = thumbIndex + 1;
             const src = slots[index];
             return (

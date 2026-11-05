@@ -116,11 +116,8 @@ export default async function StoreDetailPage({
       <SiteNav activeLink={isDigital ? "數位資產" : "我要找店"} />
       <main className={styles.main}>
         <StoreBreadcrumb store={store} />
-        <StoreGallery
-          images={store.images}
-          tags={store.tags}
-          isDigital={isDigital}
-        />
+        {/* digital-asset photos are for Bezold review only — no gallery */}
+        {!isDigital && <StoreGallery images={store.images} tags={store.tags} />}
         <StoreTitleRow store={store} />
         {isDigital && <DigitalStatsBar store={store} />}
         <div className={styles.mainCol}>
