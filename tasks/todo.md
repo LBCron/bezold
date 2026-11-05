@@ -1,90 +1,119 @@
-# Tasks: 後台一鍵下載所有店家資料（CSV）
+# Tasks: 數位資產照片不公開＋表單隱私提醒
 
 Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
-## Task 1: CSV 產生器 + 單元測試
+## Task 1: 公開資料路徑不帶數位資產照片
 
-**Description:** 新增純函式 `utils/storeCsv.ts`，把已經整理好的 `Store[]`（含 `userInfo`）轉成 SPEC 定義的 CSV 字串，並提供檔名函式。另外新增 Node 內建 test runner 的單元測試和 `test:unit` script。
+**Description:** 數位資產在公開 server 讀取路徑上一律 `images: []`，不簽任何照片 URL；公開閘門和卡片再各擋一次。
 
 **Acceptance criteria:**
 
-- [x] `toStoreCsv(stores, { appUrl })` 回傳開頭是 BOM 的字串，換行用 CRLF，標題列的 30 個欄位順序和 SPEC 的表格一樣
-- [x] 跳脫、空值、陣列 `|`、布林、台北時間 `YYYY-MM-DD HH:mm`、公式前綴 `'`（只加在自由文字欄位），都符合 SPEC
-- [x] `exportFileName(now)` 用台北日期回傳 `bezold-sellers-YYYYMMDD.csv`
+- [x] server `getStoreById()` 遇到數位資產回 `images: []`、不呼叫 `getImagesByPath()`；實體店面照舊簽
+- [x] `getDigitalAssets()` 回傳的每筆 `images` 都是 `[]`、不簽 URL
+- [x] `omitSellerContact()` 對數位資產清空 `images`；`digitalAssetToCard()` 不帶 `image`
 
 **Verification:**
 
-- [x] `npm run test:unit` 通過，涵蓋 SPEC T1 列出的每一種情況
-- [x] `npx prettier --write`、lint 0 錯誤
+- [x] `curl localhost:3000/api/stores/<數位資產 id>` → `images: []`
+- [x] `/digital-assets`、首頁數位資產區：卡片是無圖樣式，HTML 搜不到 `storage.googleapis.com`／`firebasestorage`
+- [x] `/store-list`、首頁實體店卡片照片照常
+- [x] lint 通過
 
 **Dependencies:** None
 
 **Files likely touched:**
 
-- `utils/storeCsv.ts`（新增）
-- `tests/unit/storeCsv.test.ts`（新增）
-- `package.json`（`test:unit`）
+- `firebase/serverUtils/store.ts`
+- `utils/store.ts`
 
-**Estimated scope:** Small
+**Estimated scope:** S
 
-## Task 2: Export API
+## Task 2: 數位資產刊登頁拿掉圖庫
 
-**Description:** 新增 `getStoresForExport()`：讀取草稿以外的全部店家，再批次讀進賣家資料（沒有 email 的用 Auth email 補）。新增 `GET /api/admin/stores/export`：檢查管理員權限 → 把 `status`／`listingType` 整理好 → `toStoreCsv` → 寫 `admin_store_export` log → 回傳附件。另外把 `bezold-sellers-*.csv` 加進 `.gitignore`。
+**Description:** `/store/[storeId]` 的數位資產不 render `StoreGallery`；`og:image`、JSON-LD 因 `images` 為空而退回 `bezold-og.png`。移除 `StoreGallery` 用不到的 `isDigital` 分支。
 
 **Acceptance criteria:**
 
-- [x] 不帶 token 回 401；非管理員回 403；管理員回 200，有 `Content-Type: text/csv; charset=utf-8`、`Content-Disposition: attachment; filename="bezold-sellers-YYYYMMDD.csv"`、`Cache-Control: no-store`、`X-Row-Count`
-- [x] 資料列數 = mock 裡草稿以外的店家數；`id` 不重複；賣家欄位和後台 drawer 一致
-- [x] 每次成功下載都寫一行 `admin_store_export` JSON log（adminUid、adminEmail、rowCount、exportedAt），裡面沒有店家資料
+- [x] 數位資產刊登頁沒有圖庫區塊，版面從麵包屑 → 標題列 → 數據列，不留空白
+- [x] `og:image` 和 JSON-LD `image` 是 `bezold-og.png`
+- [x] `StoreGallery` 的 `isDigital` prop、`SLOT_LABELS.digital` 移除；實體刊登頁、`/store-example` 圖庫不變
 
 **Verification:**
 
-- [x] 確認 `.env.development` 的 `NEXT_PUBLIC_ENV_VERSION=dev` 後跑 `npm run dev`
-- [x] 用 curl 檢查 401；用管理員 token 檢查 200 和 header（SPEC T5）
-- [ ] 403（非管理員 token）：沒有非管理員測試帳號，未實測；沿用既有的 `verifyAdminToken`
-- [x] dev server 終端機出現 log 行（SPEC T6）
-- [x] `npm run build` 通過
+- [x] view-source 數位資產刊登頁：搜不到照片 URL，`og:image` 正確
+- [ ] 實體店面刊登頁圖庫、lightbox 照常
+- [ ] 手機寬度截圖確認版面
+- [x] lint、build 通過
 
 **Dependencies:** Task 1
 
 **Files likely touched:**
 
-- `firebase/serverUtils/store.ts`（`getStoresForExport`）
-- `app/api/admin/stores/export/route.ts`（新增）
-- `.gitignore`
+- `app/(new)/store/[storeId]/page.tsx`
+- `app/(new)/store/[storeId]/_components/StoreGallery.tsx`
 
-**Estimated scope:** Small
+**Estimated scope:** S
 
-## Checkpoint: API
+## Checkpoint: 照片
 
-- [x] `npm run test:unit` 通過
-- [x] curl 401／403／200 正確，log 行正確
+- [x] 公開頁面、API、OG 都沒有數位資產照片 URL；實體店面不變
+- [ ] 管理員 `StoreDetailDrawer`、`/my-listings` 縮圖仍看得到數位資產照片
+- [x] lint、build 通過
 
-## Task 3: 後台下載按鈕
+## Task 3: 資產名稱／資產描述的公開提醒＋placeholder
 
-**Description:** 在 `/admin/store/list` 工具列最後加一顆「下載所有店家資料（CSV）」的 `AntButton`。按下後用 `authedFetch` 拿 blob，用暫時的 object URL 觸發下載（檔名取自 `Content-Disposition`）。下載中顯示 loading，`idToken` 還沒拿到時 disabled，成功和失敗都要有訊息。
+**Description:** `FormField` 加 `notice?: React.ReactNode` slot（label 和 input 之間）。兩則提醒存成 `constant/digitalAsset.ts` 常數，在 `DigitalFieldsSection` 的「資產名稱」「資產描述」上方顯示；placeholder 改為 `例：手作飾品電商＋社群`。
 
 **Acceptance criteria:**
 
-- [x] 按一下就下載 `bezold-sellers-YYYYMMDD.csv`，不受搜尋、篩選、分頁、勾選影響
-- [x] 下載中按鈕是 loading、不能重複按；成功顯示「已下載 N 筆」，失敗顯示「下載失敗，請稍後再試」
-- [x] 下載後 object URL 有 revoke
+- [x] `ASSET_NAME_PUBLIC_WARNING`、`ASSET_DESCRIPTION_PUBLIC_WARNING` 文字與 SPEC.md 一致，各兩行分開顯示
+- [x] 兩則提醒都在欄位標題下、輸入框上方，使用 `.warning` 樣式和 `role="note"`
+- [x] 不傳 `notice` 的 `FormField` 外觀完全不變
 
 **Verification:**
 
-- [x] 瀏覽器實際下載；用 Excel／Numbers 打開，中文正常、欄位對齊、有換行的描述留在同一格（SPEC T2）
-- [x] 列數 = 後台列表「所有狀態＋所有類型」的總數；抽 3 筆和 drawer 比對（SPEC T3、T4）
-- [x] lint 0 錯誤、`npm run build` 通過（SPEC T7）
+- [x] `/sell?type=digital`、`/my-listings/edit/<數位資產 id>` 截圖（桌機＋手機寬度）
+- [ ] 抽查一個實體表單的 `FormField`（`/sell` 實體、登入頁）沒變
+- [x] lint 通過
 
-**Dependencies:** Task 2
+**Dependencies:** None
 
 **Files likely touched:**
 
-- `app/admin/store/list/page.tsx`
+- `components/refactored/FormField.tsx`
+- `constant/digitalAsset.ts`
+- `components/storeForm/DigitalFieldsSection.tsx`
 
-**Estimated scope:** XS
+**Estimated scope:** S
+
+## Task 4: 照片上傳區文案
+
+**Description:** 數位資產的照片上傳區不再暗示買家看得到，依 SPEC.md B 段改文案。
+
+**Acceptance criteria:**
+
+- [x] `/sell` 數位第二步：heading `上傳照片（選填）`、note 為 SPEC.md 的新文字
+- [x] `/my-listings` 編輯頁 heading（數位）：`照片（不公開）`
+- [x] `ListingCard` 縮圖 label（數位）：`照片`；實體仍是 `店面照`
+
+**Verification:**
+
+- [ ] `/sell?type=digital` 送出後的上傳步驟、`/my-listings`、編輯頁截圖
+- [x] lint 通過
+
+**Dependencies:** None
+
+**Files likely touched:**
+
+- `app/(new)/sell/_components/SellForm.tsx`
+- `app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx`
+- `app/(new)/my-listings/_components/ListingCard.tsx`
+
+**Estimated scope:** S
 
 ## Checkpoint: Complete
 
-- [x] SPEC T1–T7 全部通過
-- [x] 停下讓你看過，再 commit；一個 PR，描述連結 #99，不貼任何真實資料
+- [ ] SPEC.md 的 Success Criteria 全部打勾
+- [x] `npm run build`、lint 通過
+- [x] `npm run test:rules` 通過（或註明跑不了）
+- [ ] 給你 review，再 commit

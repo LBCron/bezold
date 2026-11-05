@@ -32,6 +32,19 @@ export const REVENUE_DISCLAIMER = "賣家提供，未經 Bezold 查核";
 
 export const NO_CREDENTIALS_WARNING = "請勿提供密碼、驗證碼或其他登入資訊。";
 
+// * shown above 資產名稱 — the name is public, so describe the type, not the
+// * brand. No ⚠ here: the .warning style adds it
+export const ASSET_NAME_PUBLIC_WARNING = [
+  "此欄位會公開顯示，請以類型描述資產，勿填入品牌名、帳號名稱或網址。",
+  "例如：寫「手作飾品電商」，而非「○○手作飾品蝦皮賣場」。",
+];
+
+// * shown above 資產描述
+export const ASSET_DESCRIPTION_PUBLIC_WARNING = [
+  "描述內容會公開顯示，請勿留下電話、Email、LINE 等聯絡方式，或可辨識資產的品牌名、帳號。",
+  "截圖與連結僅供 Bezold 核對及付費買家查閱；上傳前請遮住姓名、Email 等個資，並確認未包含密碼或驗證碼。",
+];
+
 export const TRANSFER_RISK_NOTICE =
   "刊登與移轉方式須依資產權利及相關平台規範確認。填寫表單時，請勿提供密碼、驗證碼或其他登入資訊。";
 

@@ -1,232 +1,173 @@
-# Spec: 後台一鍵下載所有店家資料（CSV）
-
-來源：[v-salvator/bezold#99](https://github.com/v-salvator/bezold/issues/99)
+# Spec: 數位資產頂讓 — 照片不公開＋表單隱私提醒
 
 ## Objective
 
-自動確認信系統（#98）需要一份完整的店家名單，才能依上架時間排程寄信。目前後台沒辦法一次拿到所有店家資料。
+數位資產是匿名刊登：買家不該從公開頁面認出是哪個賣場、帳號或品牌。目前有兩個漏洞：
 
-這次在後台店家列表頁加一個按鈕，管理員按一下就能下載**所有刊登＋賣家聯絡資料**，存成 CSV。這個檔案可以匯入自動寄信系統，也能直接用 Excel 打開。
+1. **封面照片會公開**：賣家上傳的封面照（`images`）會出現在刊登頁圖庫、列表卡片、OG 圖和 JSON-LD。照片常帶有賣場名、Logo 或帳號，等於洩漏身分。
+2. **表單沒提醒哪些欄位會公開**：賣家常在「資產名稱」直接填賣場名（連 placeholder 都示範「手作飾品蝦皮賣場」），或在描述留聯絡方式。
 
-使用者：Bezold 管理員（Firebase `admin` custom claim）。
+這次的調整：
+
+- 數位資產的**所有照片不公開**：只給 Bezold 管理員核對，潛在買家支付賣家資料解鎖費後由 Bezold 私訊提供（和營收截圖、資產連結同一套流程，網站外手動處理）。賣家本人在自己的後台仍看得到自己上傳的。公開頁面、公開 API 一律不出現。
+- 在賣家填寫的表單（`/sell` 和 `/my-listings` 編輯頁）加上兩則公開提醒。
+
+使用者：數位資產賣家（填表）、潛在買家（看公開頁）、Bezold 管理員（核對照片）。
 
 ### 已確認的決定
 
-| #   | 決定                                                                                                                                                |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | **欄位名稱照 Firebase 的 key**（`storeName`、`monthlyRent`、`userInfo.email`…），不照 issue 的 `title`、`rent`、`owner_email`。對照表見下方「欄位」 |
-| D2  | 上架時間用 `createTime`，不新增 `approvedTime` 欄位，資料模型不變                                                                                   |
-| D3  | 範圍：**草稿以外的全部刊登**（pending／approved／rejected／sold，實體＋數位），和後台列表「所有狀態」的筆數一致                                     |
-| D4  | 列舉值用 **Firestore 原始值**（`approved`、`RESTAURANT`、`EMERGENCY\|RECOMMENDED`），不轉成中文標籤                                                 |
-| D5  | 下載紀錄**只寫 server log**（一行結構化 JSON），不新增 Firestore 集合、不做後台檢視頁                                                               |
+| #   | 決定                                                                                                           |
+| --- | -------------------------------------------------------------------------------------------------------------- |
+| D1  | **保留**賣家上傳照片的功能（選填），但改為不公開；網站上只有管理員和賣家本人看得到，付費買家由 Bezold 私訊提供 |
+| D2  | 公開刊登頁的數位資產**整個拿掉圖庫區塊**，頁面直接從麵包屑 → 標題列 → 數據列。實體店面不變                     |
+| D3  | 「資產名稱」placeholder 改為 `例：手作飾品電商＋社群`                                                          |
+| D4  | 營收截圖（`verificationImages`）本來就只給管理員／賣家，這次不動                                               |
+| D5  | 不搬資料、不刪檔：既有數位資產的 `images` 和 Storage 檔案原地保留，只在讀取端擋掉。管理員後台照舊看得到        |
 
-### 連帶影響（不在這個 repo）
+## 要改的地方
 
-因為 D1、D4，CSV 的欄位名稱和值跟 issue 寫的不同，自動寄信系統的 `import_stores.py` 需要對應調整（欄位對照見下表），否則 issue 的驗收條件「格式錯誤 0 筆」不會過。這部分由你在自動寄信系統那邊處理。
+### A. 照片不公開
+
+公開讀取數位資產的路徑只有三條，全部經過 server（Admin SDK 簽 URL，簽出的 URL 不受 `storage.rules` 管）。所以擋法是**數位資產在公開路徑上不簽 URL、`images` 給空陣列**：
+
+| 路徑                                                           | 現在                               | 改成                                                                                  |
+| -------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- |
+| `/store/[storeId]`（`getStoreById` → `omitSellerContact`）     | 簽全部照片，圖庫＋OG＋JSON-LD 都用 | 數位資產 `images: []`；不 render `StoreGallery`；OG／JSON-LD 退回預設 `bezold-og.png` |
+| `GET /api/stores/[storeId]`（同上）                            | 回傳簽好的照片 URL                 | 數位資產 `images: []`                                                                 |
+| `getDigitalAssets()`（首頁數位資產區、`/digital-assets` 列表） | 簽封面，卡片顯示                   | 不簽，卡片走既有的「數位資產」無圖樣式                                                |
+
+做法：
+
+- `omitSellerContact()`（`utils/store.ts`）本來就是公開資料的唯一閘門（已經清掉 `assetUrl`、`verificationImages`）→ 數位資產再加清 `images`。這同時涵蓋刊登頁和 API。
+- `firebase/serverUtils/store.ts`：`getDigitalAssets()` 不再呼叫 `resolveStoreImages`，回傳的數位資產 `images` 一律 `[]`；server 版 `getStoreById()` 遇到數位資產回 `images: []`、不簽照片。這也擋住 `generateMetadata()` —— 它用的是沒經過 `omitSellerContact()` 的 store，現在 `og:image` 會拿到簽好的照片 URL。
+- `digitalAssetToCard()` 的 `image` 一律 `undefined`（雙保險：即使哪天上游忘了清，卡片也不顯示）。
+- `app/(new)/store/[storeId]/page.tsx`：`isDigital` 時不 render `<StoreGallery>`。`StoreGallery` 的 `isDigital` prop 和 `SLOT_LABELS.digital` 變成沒人用 → 一併移除。
+
+**不動的地方**（這些是管理員／賣家本人的路徑，走 client SDK＋`storage.rules`，本來就只給 admin 或 owner）：
+
+- 管理員：`StoreDetailDrawer`、`/admin/store/edit/[storeId]/image`
+- 賣家：`/my-listings` 的 `ListingCard` 縮圖、編輯頁的照片上傳區
+- `storage.rules`、`firestore.rules`：不需要改
+
+### B. 照片上傳區的文案
+
+照片不再給買家看，上傳區的文案要跟著改，不能再說「讓買家更了解」：
+
+| 位置                                            | 現在                                                                                               | 改成                                                                                                                                   |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `/sell` 數位資產第二步 heading                  | 上傳封面照片（選填）                                                                               | 上傳照片（選填）                                                                                                                       |
+| `/sell` 數位資產第二步 note                     | 資產資料已送出！可上傳賣場、社群或網站的封面圖讓買家更了解，也可略過。請勿上傳含帳號或個資的畫面。 | 資產資料已送出！可上傳賣場、社群或網站的畫面，僅供 Bezold 核對及付費買家查閱，不會公開顯示，也可略過。上傳前請遮住姓名、Email 等個資。 |
+| `/my-listings` 編輯頁 heading（數位）           | 封面照片                                                                                           | 照片（不公開）                                                                                                                         |
+| `/my-listings` `ListingCard` 縮圖 label（數位） | 封面圖                                                                                             | 照片                                                                                                                                   |
+
+（照片 wording 已確認；note 的「僅供 Bezold 核對及付費買家查閱」和描述提醒第二行一致。）
+
+### C. 表單公開提醒
+
+兩則提醒放在 `components/storeForm/DigitalFieldsSection.tsx`，所以 `/sell` 和 `/my-listings` 編輯頁會同時出現。樣式沿用既有的 `styles.warning`（`role="note"`），放在**欄位標題下、輸入框上方**，讓賣家打字前就看到。
+
+文字照你給的，存成 `constant/digitalAsset.ts` 的常數：
+
+```ts
+// * shown above 資產名稱 — the name is public, so describe the type, not the brand
+export const ASSET_NAME_PUBLIC_WARNING = [
+  "⚠️ 此欄位會公開顯示，請以類型描述資產，勿填入品牌名、帳號名稱或網址。",
+  "例如：寫「手作飾品電商」，而非「○○手作飾品蝦皮賣場」。",
+];
+
+// * shown above 資產描述
+export const ASSET_DESCRIPTION_PUBLIC_WARNING = [
+  "⚠️ 描述內容會公開顯示，請勿留下電話、Email、LINE 等聯絡方式，或可辨識資產的品牌名、帳號。",
+  "截圖與連結僅供 Bezold 核對及付費買家查閱；上傳前請遮住姓名、Email 等個資，並確認未包含密碼或驗證碼。",
+];
+```
+
+每則兩行，各自一個 `<span>` 換行顯示（第二行是補充）。
+
+另外：
+
+- 「資產名稱」placeholder：`例：手作飾品蝦皮賣場＋FB 社團` → `例：手作飾品電商＋社群`（D3）。
+- `FormField` 已有 `hint`，但在 input 下方 → 新增 `notice?: React.ReactNode` slot，在 label 和 input 之間 render（`components/refactored/FormField.tsx`，通用、別的表單也能用）。呼叫端傳入 `<p className={styles.warning} role="note">…</p>`，`FormField` 不碰樣式。
 
 ## Tech Stack
 
-- Next.js 14（App Router）· TypeScript · Ant Design 5（後台）· Firebase Admin SDK
-- 時區轉換用內建 `Intl.DateTimeFormat`（`Asia/Taipei`），同 `lib/analytics/fetchStoreAnalytics.ts`
-- **不加任何套件**
+Next.js 14（App Router）· TypeScript · CSS Modules · Firebase Admin SDK（server 讀取）。不新增套件。
 
 ## Commands
 
 ```bash
 nvm use
-
-# 格式化、lint、build（每個任務完成前都要跑）
-npx prettier --write <changed files>
-npx eslint --no-eslintrc -c .eslintrc.json --ext .ts,.tsx app components constant types utils hooks lib firebase atoms
+npm run dev          # 本機驗證（先確認 .env.development 是 NEXT_PUBLIC_ENV_VERSION=dev）
+npx eslint --no-eslintrc -c .eslintrc.json "app/**/*.tsx" "components/**/*.tsx" "utils/**/*.ts" "firebase/**/*.ts" "constant/**/*.ts"
 npm run build
-
-# CSV 產生器的單元測試（新增，Node 內建 test runner，不用 emulator）
-npm run test:unit
-
-# 本機驗證（先確認 .env.development 的 NEXT_PUBLIC_ENV_VERSION=dev，讀 mockStore / mockUser）
-npm run dev
-
-# API 權限檢查
-curl -i http://localhost:3000/api/admin/stores/export                                   # → 401
-curl -i -H "Authorization: Bearer <非管理員 idToken>" http://localhost:3000/api/admin/stores/export  # → 403
+npx prettier --write <changed files>
 ```
 
-## Project Structure
+## Project Structure（會動到的檔案）
 
-| 檔案                                   | 變更 | 內容                                                                                                                                                                       |
-| -------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `utils/storeCsv.ts`                    | 新增 | 純函式：欄位定義 `STORE_CSV_COLUMNS`、`toStoreCsv(rows)`（BOM、CRLF、RFC 4180 跳脫）、`formatTaipeiTime()`、`exportFileName()`。**只用 `import type`**，讓 Node 直接跑測試 |
-| `app/api/admin/stores/export/route.ts` | 新增 | `GET`：`verifyAdminToken` → 讀所有店家與賣家 → 產生 CSV → 寫 log → 回傳附件                                                                                                |
-| `app/admin/store/list/page.tsx`        | 修改 | 工具列加「下載所有店家資料（CSV）」按鈕                                                                                                                                    |
-| `tests/unit/storeCsv.test.ts`          | 新增 | `node --test` 單元測試                                                                                                                                                     |
-| `package.json`                         | 修改 | 加 `"test:unit": "node --test tests/unit/*.test.ts"`                                                                                                                       |
-| `.gitignore`                           | 修改 | 加 `bezold-sellers-*.csv`，避免把下載的個資檔 commit 進 repo                                                                                                               |
-
-不需要改 `firestore.rules`、`storage.rules`、`firestore.indexes.json`：只透過 Admin SDK 讀整個集合，沒有 client 讀寫，也沒有複合查詢。
-
-## 規格
-
-### API：`GET /api/admin/stores/export`
-
-1. `verifyAdminToken(req)`；失敗直接回它的 401／403。
-2. `db.collection(COLLECTIONS.STORE).get()` 讀全部，排除 `status === "draft"`。
-3. 收集不重複的 `user` uid，用 `db.getAll(...refs)` 一次讀 `COLLECTIONS.USER` 的賣家文件（不要每間店各查一次）。
-4. 賣家文件沒有 `email` 時，用 `adminAuth.getUsers()`（每批最多 100 個 uid）補 Firebase Auth 的 email。
-5. 找不到賣家文件的店照樣輸出，賣家欄位留空。
-6. 依 `createTime` 由新到舊排序，同時間用 `id` 排。
-7. 寫 log（見下方「下載紀錄」），再回傳：
-
-| Header                | 值                                                   |
-| --------------------- | ---------------------------------------------------- |
-| `Content-Type`        | `text/csv; charset=utf-8`                            |
-| `Content-Disposition` | `attachment; filename="bezold-sellers-YYYYMMDD.csv"` |
-| `Cache-Control`       | `no-store`                                           |
-| `X-Row-Count`         | 資料列數（給按鈕顯示「已下載 N 筆」）                |
-
-- 日期用**台北時間**的今天。
-- route 加 `export const dynamic = "force-dynamic"`，確保不會被靜態化或快取。
-- 讀取失敗回 500 `{ error: "Failed to export stores" }`，並 `console.error`（不印出店家資料）。
-
-### 後台按鈕
-
-- 放在 `/admin/store/list` 工具列（搜尋、篩選那一排）的最後面，用 `AntButton`，文字「下載所有店家資料（CSV）」。
-- 按下後 `authedFetch(idToken, "/api/admin/stores/export")` → `res.blob()` → 用暫時的 `URL.createObjectURL` 和 `<a download>` 觸發下載，下載後馬上 `revokeObjectURL`。檔名從 `Content-Disposition` 取。
-- 下載中按鈕顯示 loading、不能重複按；`idToken` 還沒拿到時 disabled。
-- 成功 `messageApi.success("已下載 N 筆")`（N 從 response header `X-Row-Count` 取）；失敗 `messageApi.error("下載失敗，請稍後再試")`。
-- 不受頁面上的搜尋、篩選、分頁、勾選影響：永遠下載全部。
-
-### CSV 格式
-
-- UTF-8 開頭加 BOM（`﻿`）；換行用 CRLF；第一列是欄位名稱。
-- 欄位有 `,`、`"`、換行時用雙引號包起來，裡面的 `"` 變成 `""`（描述常有換行，要留在同一格）。
-- 一間店一列；`id` 不會重複。
-- 空值（欄位不存在、`undefined`、`null`）輸出空字串，不輸出 `undefined` 或 `null`。
-- 陣列用 `|` 串接；布林輸出 `true`／`false`；數字原樣輸出（`areaPing` 可以有小數）。
-- 時間格式 `YYYY-MM-DD HH:mm`，台北時間，例如 `2026-07-23 14:00`。
-- **公式注入防護**：賣家自由輸入的文字欄位（`storeName`、`location`、`description`、`userInfo.userName`）若開頭是 `=`、`+`、`-`、`@`、Tab 或 CR，前面加 `'`，避免 Excel 當成公式執行。電話、email、LINE ID 等聯絡欄位不處理（`+886…`、`@xxx` 要原樣給寄信系統）。
-
-### 欄位
-
-依序輸出。對照欄是 issue #99 原本的欄位名稱。
-
-| #   | 欄位                  | 來源                                              | issue 對照                  | 格式                                      |
-| --- | --------------------- | ------------------------------------------------- | --------------------------- | ----------------------------------------- |
-| 1   | `id`                  | 店家 doc id                                       | `store_id`                  | 唯一                                      |
-| 2   | `storeName`           | store                                             | `title`                     | 文字                                      |
-| 3   | `status`              | store；不存在時輸出 `pending`（同後台列表的判斷） | `status`                    | `pending`／`approved`／`rejected`／`sold` |
-| 4   | `listingType`         | `listingTypeOf(store)`                            | —                           | `physical`／`digital`                     |
-| 5   | `city`                | store                                             | `city`                      | 數位資產為空                              |
-| 6   | `district`            | store                                             | `district`                  | 數位資產為空                              |
-| 7   | `location`            | store                                             | —                           | 文字                                      |
-| 8   | `category`            | store                                             | `industry`                  | `RESTAURANT` 等原始值                     |
-| 9   | `tags`                | store                                             | （issue 的 `急售`／`精選`） | `EMERGENCY\|RECOMMENDED`                  |
-| 10  | `digitalTypes`        | store                                             | —                           | `SOCIAL\|WEBSITE`                         |
-| 11  | `price`               | store                                             | `price`                     | 整數（數位資產是區間下限）                |
-| 12  | `priceMax`            | store                                             | —                           | 整數                                      |
-| 13  | `priceNegotiable`     | store                                             | —                           | `true`／`false`                           |
-| 14  | `currency`            | store                                             | —                           | 文字                                      |
-| 15  | `monthlyRent`         | store                                             | `rent`                      | 整數                                      |
-| 16  | `areaPing`            | store                                             | `size_ping`                 | 數字                                      |
-| 17  | `equipment`           | store                                             | —                           | `all`／`none`／`partial`                  |
-| 18  | `operatingYears`      | store                                             | —                           | 數字                                      |
-| 19  | `monthlyRevenue`      | store                                             | —                           | 整數                                      |
-| 20  | `storeUrl`            | `${NEXT_PUBLIC_APP_URL}/store/${id}`              | `store_url`                 | 完整網址                                  |
-| 21  | `description`         | store                                             | `raw_description`           | 文字，可含換行                            |
-| 22  | `createTime`          | store                                             | `listed_at`（D2）           | `YYYY-MM-DD HH:mm` 台北時間               |
-| 23  | `updateTime`          | store                                             | `updated_at`                | 同上                                      |
-| 24  | `user`                | store（賣家 uid）                                 | —                           | 文字                                      |
-| 25  | `userInfo.userName`   | user doc                                          | `owner_name`                | 文字                                      |
-| 26  | `userInfo.email`      | user doc，沒有時用 Firebase Auth email            | `owner_email`               | 文字                                      |
-| 27  | `userInfo.phone`      | user doc                                          | `owner_phone`               | 文字                                      |
-| 28  | `userInfo.lineId`     | user doc                                          | `owner_line_id`             | 文字                                      |
-| 29  | `userInfo.threadsId`  | user doc                                          | （「其他聯絡方式」）        | 文字                                      |
-| 30  | `userInfo.createTime` | user doc                                          | `created_at`                | `YYYY-MM-DD HH:mm` 台北時間               |
-
-**Firebase 沒有、這次不輸出的 issue 欄位**：`plan`（沒有付費方案）、`highlights`（沒有這個欄位；最接近的是 `tags`）、`marketing_opt_out`（沒有記錄）、`contact_name`／`contact_phone`／`contact_email`（沒有「聯絡人不是店主」的欄位）。匯入系統會略過不認得的欄位，缺的欄位要由匯入端當成空白。
-
-**刻意不輸出**：`images`、`verificationImages`、`assetUrl`（不是聯絡資料，且屬於後台專用資訊）、`buyerProfile` 等買家偏好。
-
-### 下載紀錄
-
-每次成功產生 CSV，在回傳前寫一行：
-
-```ts
-console.info(
-  JSON.stringify({
-    event: "admin_store_export",
-    adminUid: decoded.uid,
-    adminEmail: decoded.email ?? "",
-    rowCount: rows.length,
-    exportedAt: new Date().toISOString(),
-  }),
-);
 ```
-
-只記錄誰、什麼時候、幾筆，**不記錄任何店家或賣家資料**。正式站從 hosting 的 runtime logs 搜尋 `admin_store_export` 查看；本機看 dev server 的終端機。
+utils/store.ts                                        → omitSellerContact 清 images、digitalAssetToCard 不帶 image
+firebase/serverUtils/store.ts                         → getDigitalAssets / getStoreById 不簽數位資產照片
+app/(new)/store/[storeId]/page.tsx                    → 數位資產不 render 圖庫
+app/(new)/store/[storeId]/_components/StoreGallery.tsx → 移除 isDigital 分支
+constant/digitalAsset.ts                              → 兩則提醒常數
+components/storeForm/DigitalFieldsSection.tsx         → 插入提醒、改 placeholder
+components/refactored/FormField.tsx                   → 新增 notice slot
+app/(new)/sell/_components/SellForm.tsx               → 上傳區文案
+app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx → 上傳區文案
+app/(new)/my-listings/_components/ListingCard.tsx     → 縮圖 label
+```
 
 ## Code Style
 
-沿用專案寫法：`// *` 註解、完整變數名稱（不用 `v`、`k`、`e`）、轉換資料的函式放 `utils/`、靜態值放 `constant/`、API 用 `verifyAdminToken` + `NextResponse`。
+照既有慣例：CSS Module 管外觀、Tailwind 只管版面且不混用；條件 class 用 `cn()`；註解用 `// * ` 開頭、短句說「為什麼」；變數名不縮寫。文案常數放 `constant/`，資料轉換放 `utils/`。
 
-```ts
-// utils/storeCsv.ts
-// * only `import type` here — tests/unit runs this file with plain `node --test`,
-// * which cannot resolve the `@/` alias at runtime
-import type { Store } from "@/types";
-
-const FORMULA_PREFIXES = ["=", "+", "-", "@", "\t", "\r"];
-
-// * seller-typed free text could start with "=" and run as a formula in Excel
-const guardFormula = (value: string) =>
-  FORMULA_PREFIXES.some((prefix) => value.startsWith(prefix))
-    ? `'${value}`
-    : value;
-
-const escapeCell = (value: string) =>
-  /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+```tsx
+<div className={styles.field}>
+  <label className={styles.label} htmlFor="description">
+    資產描述
+  </label>
+  <p className={styles.warning} role="note">
+    {ASSET_DESCRIPTION_PUBLIC_WARNING.map((line) => (
+      <span key={line} className="block">{line}</span>
+    ))}
+  </p>
+  <textarea id="description" … />
+</div>
 ```
+
+（`<span>` 沒有 module class，可以用 Tailwind `block`。）
 
 ## Testing Strategy
 
-App 沒有測試框架；這次新增一支**不需要任何套件**的單元測試（Node 24 內建 `node --test`，直接跑 `.ts`），只測 `utils/storeCsv.ts` 這個純函式。API 和按鈕用本機 dev（`NEXT_PUBLIC_ENV_VERSION=dev`，讀 `mockStore` / `mockUser`）驗證。
-
-| #   | 驗證                                                                                                                                                                                                                                                                                                   |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| T1  | `npm run test:unit`：開頭有 BOM、CRLF、標題列順序和上表一致；含 `,`、`"`、換行的值正確跳脫；空值是空字串；陣列用 `\|`；UTC `2026-07-23T06:00:00Z` → `2026-07-23 14:00`；`=SUM(A1)` 的店名變成 `'=SUM(A1)`，`+886…` 的電話不變；檔名 `bezold-sellers-YYYYMMDD.csv` 以台北日期計算（UTC 16:30 已是隔天） |
-| T2  | 本機後台按按鈕 → 下載 `bezold-sellers-20261103.csv`（以當天日期為準）；用 Excel／Numbers 打開中文正常、欄位對齊、有換行的描述留在同一格                                                                                                                                                                |
-| T3  | 資料列數 = 後台列表「所有狀態＋所有類型」的總筆數；`id` 沒有重複；草稿不在檔案裡；數位資產在檔案裡                                                                                                                                                                                                     |
-| T4  | 隨機抽 3 筆，和後台 drawer 裡的店名、價格、賣家電話／email 一致；沒有 user doc email 的賣家有補上 Auth email                                                                                                                                                                                           |
-| T5  | curl 不帶 token → 401；非管理員 token → 403；管理員 → 200，header 有 `Cache-Control: no-store` 和 `Content-Disposition: attachment`                                                                                                                                                                    |
-| T6  | dev server 終端機有一行 `admin_store_export`，`rowCount` 和 T3 一致，裡面沒有任何店家資料                                                                                                                                                                                                              |
-| T7  | lint 0 錯誤、`npm run build` 通過                                                                                                                                                                                                                                                                      |
+- App code 沒有測試框架；`storage.rules`／`firestore.rules` 沒改，所以不新增 rules 測試。
+- `npm run test:rules` 跑一次確認沒被影響（需要 Java 21；跑不了就註明）。
+- 手動驗證（dev 環境、mock 資料，用一筆**有 `images` 的數位資產**）：
+  1. `/store/<數位資產 id>`：沒有圖庫區塊；view-source 搜不到 `firebasestorage`／`storage.googleapis.com` 照片 URL；`og:image` 是 `bezold-og.png`。
+  2. `GET /api/stores/<數位資產 id>`：`images` 是 `[]`。
+  3. 首頁數位資產區、`/digital-assets`：卡片顯示無圖樣式，HTML 不含照片 URL。
+  4. 實體店面刊登頁、`/store-list` 卡片：照片照常顯示（回歸檢查）。
+  5. 管理員 `StoreDetailDrawer`、`/admin/store/edit/<id>/image`：數位資產的照片照常看得到。
+  6. `/sell?type=digital`、`/my-listings/edit/<id>`：兩則提醒在欄位標題下、輸入框上方；placeholder 已改；手機寬度不破版。
+- `npm run build`、lint 通過。
 
 ## Boundaries
 
-- **Always**
-  - API 第一步就是 `verifyAdminToken`；按鈕藏起來不算權限檢查
-  - 回應加 `Cache-Control: no-store`；CSV 只在記憶體產生、直接回傳
-  - 集合名稱用 `COLLECTIONS.*`；賣家資料用一次 `getAll` 讀，不要每間店查一次
-  - 改過的檔案都跑 prettier；本機測試前確認 `NEXT_PUBLIC_ENV_VERSION=dev`
-  - 驗證完先停下讓你看，再 commit；用 worktree branch + PR，不直接動 main
-- **Ask first**
-  - 用正式資料（`prodStore` / `prodUser`）跑下載
-  - 加任何套件；新增上表以外的欄位（例如 `userInfo.remark`）
-  - 改動 `Store` / `User` 的資料模型
-- **Never**
-  - 把下載的 CSV commit 進 repo、貼到 issue／PR，或放進 `public/`
-  - 產生公開或可分享的下載連結；把檔案寫到 Storage、磁碟、雲端硬碟，或寄到信箱
-  - 在 log 或錯誤訊息裡印出店家、賣家資料
-  - 讓這個 endpoint 被快取或靜態化
+- **Always**：公開資料一律經 `omitSellerContact()`；改完跑 prettier；實作完先給你 review 再 commit；在 worktree branch 上做，開 PR，不碰 main。
+- **Ask first**：刪除或搬移既有數位資產的 Storage 照片／`images` 欄位；改 `storage.rules`／`firestore.rules`；改實體店面的照片行為；文案（B 段）有任何不確定。
+- **Never**：在公開路徑產生數位資產照片的 URL；動 Firebase console 的 rules／indexes；deploy。
 
 ## Success Criteria
 
-1. 管理員在後台按一下就下載到 `bezold-sellers-YYYYMMDD.csv`，Excel 直接打開中文正常、欄位對齊（T2）。
-2. 檔案包含草稿以外的全部刊登，筆數和後台列表總數一致，一間店一列（T3）。
-3. 欄位名稱和值照 Firebase 的 key 與原始值，內容和後台資料一致（T1、T4）。
-4. 非管理員直接打 API 會被拒絕，回應不會被快取（T5）。
-5. 每次下載都在 server log 留下管理員、時間、筆數（T6）。
-6. lint、build、單元測試全過（T1、T7）。
+- [x] 數位資產的照片 URL 不出現在任何公開頁面的 HTML、OG／JSON-LD、或 `/api/stores/[id]` 回應中（含既有、已上傳照片的刊登）
+- [x] 數位資產刊登頁沒有圖庫區塊；列表卡片顯示無圖樣式
+- [x] 實體店面的照片顯示完全不變
+- [ ] 管理員後台、賣家自己的 `/my-listings` 仍看得到數位資產照片
+- [x] `/sell` 和 `/my-listings` 編輯頁：資產名稱、資產描述上方各有一則提醒，文字與本 spec 一致
+- [x] 資產名稱 placeholder 為 `例：手作飾品電商＋社群`
+- [x] 照片上傳區文案不再暗示買家看得到
+- [x] lint、build 通過
 
 ## Open Questions
 
-1. `userInfo.remark`（使用者文件上的備註）要不要也輸出？目前不輸出，因為它不是聯絡資料，可能含有內部備註。
+無 — 照片 wording 和付費買家是否收到照片都已確認。

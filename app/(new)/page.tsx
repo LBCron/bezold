@@ -56,7 +56,6 @@ export default async function NewHomePage() {
         ? getDigitalAssets({
             statuses: [STORE_STATUS.APPROVED],
             limit: 6,
-            coverOnly: true,
           })
         : Promise.resolve([]),
     ]);
