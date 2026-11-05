@@ -8,7 +8,7 @@ import {
   type StoreStatus,
 } from "@/types";
 import { getImagesByPath } from "./image";
-import { getUserById } from "./user";
+import { getUserById, getUsersByIds, timestampToDate } from "./user";
 import { COLLECTIONS } from "@/firebase/constants";
 import { isDigitalAsset } from "@/utils/store";
 
@@ -237,3 +237,40 @@ export const getDigitalAssets = async ({
 };
 
 // TODO: create store
+
+// * createTime desc, id as the tie-breaker; a store missing createTime sorts last
+const newestFirst = (left: Store, right: Store) => {
+  const timeDifference =
+    (right.createTime?.getTime() ?? 0) - (left.createTime?.getTime() ?? 0);
+  return timeDifference || left.id.localeCompare(right.id);
+};
+
+// * admin CSV export (#99): every store except drafts, physical and digital,
+// * with its seller joined in one batched read. Images stay raw paths. No
+// * orderBy — it would silently drop any doc missing createTime.
+export const getStoresForExport = async (): Promise<Store[]> => {
+  const snapshot = await db.collection(COLLECTION).get();
+  const stores = snapshot.docs
+    .map((doc) => {
+      const storeData = doc.data();
+      return {
+        id: doc.id,
+        ...storeData,
+        createTime: timestampToDate(storeData.createTime),
+        updateTime: timestampToDate(storeData.updateTime),
+      } as Store;
+    })
+    .filter((store) => store.status !== STORE_STATUS.DRAFT);
+
+  const sellerIds = Array.from(
+    new Set(stores.flatMap((store) => (store.user ? [store.user] : []))),
+  );
+  const sellers = await getUsersByIds(sellerIds);
+
+  return stores
+    .map((store) => ({
+      ...store,
+      userInfo: store.user ? sellers.get(store.user) : undefined,
+    }))
+    .sort(newestFirst);
+};
