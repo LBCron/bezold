@@ -60,6 +60,22 @@
   border-radius: 4px;
   object-fit: cover;
 }
+.email {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #cfc8b8;
+
+  & a {
+    text-decoration: none;
+    color: var(--paper);
+    font-weight: 700;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
 .socials {
   display: flex;
   gap: 10px;

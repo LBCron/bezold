@@ -27,6 +27,7 @@ import {
 } from "@/firebase/serverUtils/store";
 import { STORE_STATUS } from "@/types";
 import { SOCIAL_LINKS } from "@/constant/socials";
+import { CONTACT_EMAIL } from "@/constant/contact";
 import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 
 export const revalidate = 60;
@@ -80,6 +81,7 @@ export default async function NewHomePage() {
           alternateName: ["頂讓網", "Bezold 頂讓網", "台灣頂讓網"],
           url: process.env.NEXT_PUBLIC_APP_URL,
           logo: `${process.env.NEXT_PUBLIC_APP_URL}/bezold-avatar-v2.png`,
+          email: CONTACT_EMAIL,
           description:
             "全台店面頂讓平台，提供店面頂讓、生意頂讓真實刊登，買賣雙方直接聯絡。",
           sameAs: Object.values(SOCIAL_LINKS),
