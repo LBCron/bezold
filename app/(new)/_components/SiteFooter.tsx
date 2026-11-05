@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import ThreadsIcon from "@/components/icon/ThreadsIcon";
 import { SOCIAL_LINKS } from "@/constant/socials";
+import { CONTACT_EMAIL } from "@/constant/contact";
 import Logo from "./Logo";
 import styles from "./SiteFooter.module.css";
 
@@ -36,6 +37,11 @@ export default function SiteFooter() {
             <br />
             09:00 – 21:00
           </div>
+        </div>
+        <div className={styles.email}>
+          客服信箱
+          <br />
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
         </div>
         <div className={styles.socials}>
           <a
