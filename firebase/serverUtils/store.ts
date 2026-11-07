@@ -11,6 +11,7 @@ import { getImagesByPath } from "./image";
 import { getUserById, getUsersByIds, timestampToDate } from "./user";
 import { COLLECTIONS } from "@/firebase/constants";
 import { isDigitalAsset } from "@/utils/store";
+import { pickRelatedStores } from "@/utils/relatedStores";
 
 const COLLECTION = COLLECTIONS.STORE;
 
@@ -61,10 +62,12 @@ interface GetStoresOptions {
   coverOnly?: boolean;
 }
 
-export const getStores = async (
+// * the store-list query without image signing, so callers that show only a
+// * few of the matches can sign just those
+const queryStores = async (
   searchObj: Record<string, string>,
-  { statuses, coverOnly }: GetStoresOptions = {},
-) => {
+  statuses?: StoreStatus[],
+): Promise<Store[]> => {
   const storesRef = db.collection(COLLECTION);
 
   // * default search object to reduce the firestore compound index
@@ -118,10 +121,42 @@ export const getStores = async (
 
   // * filter in memory — an extra `where` would need a new composite index —
   // * and before signing images, so hidden stores cost nothing
-  const stores = physicalOnly(mapDocsToStores(snapshot)).filter(
+  return physicalOnly(mapDocsToStores(snapshot)).filter(
     (store) => !statuses || (!!store.status && statuses.includes(store.status)),
   );
-  return resolveStoreImages(stores, { coverOnly });
+};
+
+export const getStores = async (
+  searchObj: Record<string, string>,
+  { statuses, coverOnly }: GetStoresOptions = {},
+) => resolveStoreImages(await queryStores(searchObj, statuses), { coverOnly });
+
+const RELATED_STORES_LIMIT = 6;
+
+// * "你可能也有興趣" on the store page: approved physical listings in the same
+// * city, topped up with the same category. Both queries reuse store-list
+// * indexes; the category one only runs when the city can't fill the section.
+export const getRelatedStores = async (
+  store: Pick<Store, "id" | "city" | "category">,
+) => {
+  const approved = [STORE_STATUS.APPROVED];
+  const sameCity = store.city
+    ? await queryStores({ city: store.city }, approved)
+    : [];
+  // * +1: the current store may be in the city list
+  const cityFillsSection = sameCity.length >= RELATED_STORES_LIMIT + 1;
+  const sameCategory =
+    store.category && !cityFillsSection
+      ? await queryStores({ category: store.category }, approved)
+      : [];
+
+  const relatedStores = pickRelatedStores({
+    currentStoreId: store.id,
+    sameCity,
+    sameCategory,
+    limit: RELATED_STORES_LIMIT,
+  });
+  return resolveStoreImages(relatedStores, { coverOnly: true });
 };
 
 export const getStoreById = async (storeId: string) => {

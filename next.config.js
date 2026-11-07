@@ -6,6 +6,13 @@ const nextConfig = {
     // `constructor.name === "Long"`, so every int64 field (e.g. `limit`)
     // fails to serialize in production builds.
     serverComponentsExternalPackages: ["@google-analytics/data"],
+    // The sitemap revalidates hourly, so Vercel regenerates it inside a
+    // serverless function. File tracing doesn't follow lib/blog.ts's fs reads
+    // from the sitemap route (the blog pages trace them fine), so without this
+    // the regenerated sitemap finds no content/blog folder and lists 0 posts.
+    outputFileTracingIncludes: {
+      "/sitemap.xml": ["./content/blog/**/*"],
+    },
   },
   images: {
     // Bypass Vercel's Image Optimization (was returning 402

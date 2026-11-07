@@ -1,119 +1,164 @@
-# Tasks: 數位資產照片不公開＋表單隱私提醒
+# Tasks: `indexing-fixes` (SEO #102)
 
 Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
-## Task 1: 公開資料路徑不帶數位資產照片
+## Task 1: Get blog posts into the regenerated sitemap
 
-**Description:** 數位資產在公開 server 讀取路徑上一律 `images: []`，不簽任何照片 URL；公開閘門和卡片再各擋一次。
+**Description:** Confirm why production `sitemap.xml` has no `/blog/*` URLs although `app/sitemap.ts` maps `getAllPostsMeta()`, then fix it. Start with the tracing hypothesis: after `npm run build`, check whether the sitemap route's `.nft.json` lists `content/blog/*.mdx`. If it doesn't, add `experimental.outputFileTracingIncludes` for the sitemap route. If tracing isn't the cause, switch to the pre-approved fallback (build-time JSON of blog metadata, imported by the sitemap).
 
 **Acceptance criteria:**
 
-- [x] server `getStoreById()` 遇到數位資產回 `images: []`、不呼叫 `getImagesByPath()`；實體店面照舊簽
-- [x] `getDigitalAssets()` 回傳的每筆 `images` 都是 `[]`、不簽 URL
-- [x] `omitSellerContact()` 對數位資產清空 `images`；`digitalAssetToCard()` 不帶 `image`
+- [x] Root cause written down with evidence (trace contents before/after, or the fallback's reason) for the PR description
+- [x] After the fix, the sitemap route's trace (or bundle) includes the blog metadata source
+- [x] Each blog URL keeps `lastModified` from `updatedAt`
 
 **Verification:**
 
-- [x] `curl localhost:3000/api/stores/<數位資產 id>` → `images: []`
-- [x] `/digital-assets`、首頁數位資產區：卡片是無圖樣式，HTML 搜不到 `storage.googleapis.com`／`firebasestorage`
-- [x] `/store-list`、首頁實體店卡片照片照常
-- [x] lint 通過
+- [x] `npm run build` succeeds
+- [x] `find .next/server/app -name '*.nft.json' -path '*sitemap*' -exec grep -l 'content/blog' {} \;` prints the sitemap trace (tracing route)
+- [ ] Final proof at Checkpoint B: preview deployment `curl -s <preview>/sitemap.xml | grep -c '/blog/'` → 6
 
 **Dependencies:** None
 
 **Files likely touched:**
 
-- `firebase/serverUtils/store.ts`
-- `utils/store.ts`
+- `next.config.js`
+- `app/sitemap.ts` (only if the fallback is needed, plus a generator under `scripts/` and `package.json` prebuild)
 
-**Estimated scope:** S
+**Estimated scope:** XS (S with fallback)
 
-## Task 2: 數位資產刊登頁拿掉圖庫
+## Task 2: Root 404 page with noindex
 
-**Description:** `/store/[storeId]` 的數位資產不 render `StoreGallery`；`og:image`、JSON-LD 因 `images` 為空而退回 `bezold-og.png`。移除 `StoreGallery` 用不到的 `isDigital` 分支。
+**Description:** Add `app/not-found.tsx` so unmatched URLs and `notFound()` calls render a branded 404 that tells crawlers not to index it. It uses the page shell (`LaunchBanner`, `SiteNav`, `SiteFooter`), a short message, and links to `/`, `/store-list`, `/blog`. Wrap it in the `(new)` root class so the design tokens apply.
 
 **Acceptance criteria:**
 
-- [x] 數位資產刊登頁沒有圖庫區塊，版面從麵包屑 → 標題列 → 數據列，不留空白
-- [x] `og:image` 和 JSON-LD `image` 是 `bezold-og.png`
-- [x] `StoreGallery` 的 `isDigital` prop、`SLOT_LABELS.digital` 移除；實體刊登頁、`/store-example` 圖庫不變
+- [x] `/no-such-page` and `/store/doesNotExist` return HTTP 404
+- [x] HTML has a robots meta with `noindex`, title `找不到頁面｜頂讓網 Bezold`, and its own description (not `SITE_DESCRIPTION`)
+- [x] Renders with the site's fonts and colors; links to `/`, `/store-list`, `/blog` work
 
 **Verification:**
 
-- [x] view-source 數位資產刊登頁：搜不到照片 URL，`og:image` 正確
-- [ ] 實體店面刊登頁圖庫、lightbox 照常
-- [ ] 手機寬度截圖確認版面
-- [x] lint、build 通過
+- [x] `curl -s -o /dev/null -w '%{http_code}' localhost:3000/no-such-page` → 404
+- [x] `curl -s localhost:3000/no-such-page | grep -o '<meta name="robots"[^>]*>'` shows `noindex`; same for `/store/doesNotExist`
+- [x] Browser preview screenshot looks like the rest of the site (desktop + mobile)
+- [x] eslint + prettier clean
 
-**Dependencies:** Task 1
+**Dependencies:** None
+
+**Files likely touched:**
+
+- `app/not-found.tsx` (new)
+- `app/not-found.module.css` (new)
+
+**Estimated scope:** S
+
+## Task 3: Footer 頂讓指南 link + `lang="zh-Hant-TW"`
+
+**Description:** Add a 頂讓指南 → `/store-guide` link to `SiteFooter` (next to 創業部落格 / 常見問題) and change `<html lang>` in the root layout to `zh-Hant-TW`.
+
+**Acceptance criteria:**
+
+- [x] Footer on every `(new)` page links `/store-guide` with the label 頂讓指南, styled like its neighbors
+- [x] `<html lang="zh-Hant-TW">`
+
+**Verification:**
+
+- [x] `curl -s localhost:3000/ | grep -o 'lang="[^"]*"\|href="/store-guide"'` shows both
+- [x] Footer screenshot (desktop + mobile), no layout shift
+- [x] eslint + prettier clean
+
+**Dependencies:** None
+
+**Files likely touched:**
+
+- `app/(new)/_components/SiteFooter.tsx`
+- `app/layout.tsx`
+
+**Estimated scope:** XS
+
+## Checkpoint A: After Tasks 1–3
+
+- [x] `npm run build` succeeds; sitemap trace contains blog sources
+- [x] 404 noindex + footer link + lang verified locally
+- [x] Local commit per task
+
+## Task 4: `pickRelatedStores()` pure function + unit tests
+
+**Description:** Test-first, add a pure function in `utils/` that takes the current store, same-city candidates and same-category candidates, and returns up to `limit` (default 6) related stores. Same city first, then same category, deduped, never the current store, only approved physical listings. Add `limit` / `excludeId`-style options to `getStores()` that apply in memory before image signing, so the page signs only the covers it shows.
+
+**Acceptance criteria:**
+
+- [x] Same-city stores come first, topped up from same-category stores, no duplicates, max `limit`
+- [x] Excludes the current store and anything not `APPROVED` or digital
+- [x] Returns `[]` when nothing matches; stores without `city` or `category` skip that source
+
+**Verification:**
+
+- [x] `npm run test:unit` — new `tests/unit/relatedStores.test.ts` passes (written failing first)
+- [x] Existing `storeCsv` tests still pass; eslint + prettier clean
+
+**Dependencies:** None
+
+**Files likely touched:**
+
+- `utils/relatedStores.ts` (new)
+- `tests/unit/relatedStores.test.ts` (new)
+- `firebase/serverUtils/store.ts` (`getStores` options + `getRelatedStores` wrapper)
+
+**Estimated scope:** S
+
+## Task 5: Related-stores section on store pages
+
+**Description:** Render 「你可能也有興趣」 at the bottom of physical store pages using `getRelatedStores()` from Task 4 and `FeaturedListings` (or a thin wrapper if its props don't fit). Data passes through `omitSellerContact()`. Digital-asset pages and stores with 0 matches render nothing.
+
+**Acceptance criteria:**
+
+- [x] Physical store page shows 4–6 related store cards linking to `/store/<id>`, never the current store
+- [x] Section absent on digital-asset pages and when there are no matches
+- [x] Served HTML of the section has no seller phone, LINE, Threads or email
+
+**Verification:**
+
+- [x] Browser preview: a store in a busy city (cards shown), a store with no matches (hidden), a 面議 store, a digital asset (hidden)
+- [x] `curl -s localhost:3000/store/<id>` → no seller contact strings in the related cards
+- [x] No new Firestore index error in the server logs; `npm run build` succeeds
+
+**Dependencies:** Task 4
 
 **Files likely touched:**
 
 - `app/(new)/store/[storeId]/page.tsx`
-- `app/(new)/store/[storeId]/_components/StoreGallery.tsx`
+- `app/(new)/store/[storeId]/_components/RelatedStores.tsx` (new, only if a wrapper is needed)
 
 **Estimated scope:** S
 
-## Checkpoint: 照片
+## Task 6: Second related post on 2 blog posts
 
-- [x] 公開頁面、API、OG 都沒有數位資產照片 URL；實體店面不變
-- [ ] 管理員 `StoreDetailDrawer`、`/my-listings` 縮圖仍看得到數位資產照片
-- [x] lint、build 通過
-
-## Task 3: 資產名稱／資產描述的公開提醒＋placeholder
-
-**Description:** `FormField` 加 `notice?: React.ReactNode` slot（label 和 input 之間）。兩則提醒存成 `constant/digitalAsset.ts` 常數，在 `DigitalFieldsSection` 的「資產名稱」「資產描述」上方顯示；placeholder 改為 `例：手作飾品電商＋社群`。
+**Description:** `first-business` and `how-to-pay-takeover-fee` each link only one other post in frontmatter `related`. Add a relevant second `/blog/*` post to each, keeping their existing entries.
 
 **Acceptance criteria:**
 
-- [x] `ASSET_NAME_PUBLIC_WARNING`、`ASSET_DESCRIPTION_PUBLIC_WARNING` 文字與 SPEC.md 一致，各兩行分開顯示
-- [x] 兩則提醒都在欄位標題下、輸入框上方，使用 `.warning` 樣式和 `role="note"`
-- [x] 不傳 `notice` 的 `FormField` 外觀完全不變
+- [x] Both posts list ≥ 2 `/blog/*` entries in `related`; all 6 posts now do
+- [x] Every `related` href resolves (no 404)
 
 **Verification:**
 
-- [x] `/sell?type=digital`、`/my-listings/edit/<數位資產 id>` 截圖（桌機＋手機寬度）
-- [ ] 抽查一個實體表單的 `FormField`（`/sell` 實體、登入頁）沒變
-- [x] lint 通過
+- [x] `grep -A8 '^related' content/blog/*.mdx | grep -c 'href: "/blog/'` per post ≥ 2
+- [x] Open both posts in the preview; 延伸閱讀 links work
 
 **Dependencies:** None
 
 **Files likely touched:**
 
-- `components/refactored/FormField.tsx`
-- `constant/digitalAsset.ts`
-- `components/storeForm/DigitalFieldsSection.tsx`
+- `content/blog/first-business.mdx`
+- `content/blog/how-to-pay-takeover-fee.mdx`
 
-**Estimated scope:** S
+**Estimated scope:** XS
 
-## Task 4: 照片上傳區文案
+## Checkpoint B: Complete
 
-**Description:** 數位資產的照片上傳區不再暗示買家看得到，依 SPEC.md B 段改文案。
-
-**Acceptance criteria:**
-
-- [x] `/sell` 數位第二步：heading `上傳照片（選填）`、note 為 SPEC.md 的新文字
-- [x] `/my-listings` 編輯頁 heading（數位）：`照片（不公開）`
-- [x] `ListingCard` 縮圖 label（數位）：`照片`；實體仍是 `店面照`
-
-**Verification:**
-
-- [ ] `/sell?type=digital` 送出後的上傳步驟、`/my-listings`、編輯頁截圖
-- [x] lint 通過
-
-**Dependencies:** None
-
-**Files likely touched:**
-
-- `app/(new)/sell/_components/SellForm.tsx`
-- `app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx`
-- `app/(new)/my-listings/_components/ListingCard.tsx`
-
-**Estimated scope:** S
-
-## Checkpoint: Complete
-
-- [ ] SPEC.md 的 Success Criteria 全部打勾
-- [x] `npm run build`、lint 通過
-- [x] `npm run test:rules` 通過（或註明跑不了）
-- [ ] 給你 review，再 commit
+- [x] Every spec acceptance criterion met locally
+- [x] `npm run test:unit`, `npm run build`, eslint, prettier clean
+- [ ] User reviews the local commits
+- [ ] With the user's OK: push branch → Vercel preview `sitemap.xml` has 6 `/blog/` URLs → open PR for #102 (`Closes #102`)

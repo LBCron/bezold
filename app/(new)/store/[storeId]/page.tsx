@@ -1,6 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
-import { getStoreById } from "@/firebase/serverUtils";
+import { getRelatedStores, getStoreById } from "@/firebase/serverUtils";
 import { STORE_STATUS, type StoreStatus } from "@/types";
 import { BASE_OPEN_GRAPH } from "@/constant/seo";
 import { storeOffer, storePageTitle, toMetaDescription } from "@/utils/seo";
@@ -8,6 +8,7 @@ import { isDigitalAsset, omitSellerContact } from "@/utils/store";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
+import FeaturedListings from "@/app/(new)/_components/FeaturedListings";
 import StoreBreadcrumb from "./_components/StoreBreadcrumb";
 import StoreGallery from "./_components/StoreGallery";
 import StoreTitleRow from "./_components/StoreTitleRow";
@@ -94,6 +95,11 @@ export default async function StoreDetailPage({
   // * without offers is an invalid rich result — skip the JSON-LD entirely
   const offer = storeOffer(store, storeUrl);
   const isDigital = isDigitalAsset(store);
+  // * internal links to other live listings so crawlers (and buyers) keep
+  // * going — physical stores only; digital assets have their own list
+  const relatedStores = isDigital
+    ? []
+    : (await getRelatedStores(store)).map(omitSellerContact);
 
   return (
     <>
@@ -132,6 +138,14 @@ export default async function StoreDetailPage({
           )}
         </div>
       </main>
+      <FeaturedListings
+        stores={relatedStores}
+        num="→"
+        title="你可能也有興趣"
+        sub="— 同地區、同類型的頂讓店面 —"
+        more="看全部店面 →"
+        moreHref="/store-list"
+      />
       <SiteFooter />
       <BuyerClubPopup forceOpen={forceOpenBuyerClub} isDigital={isDigital} />
     </>
