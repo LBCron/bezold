@@ -139,13 +139,13 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] Both posts list ≥ 2 `/blog/*` entries in `related`; all 6 posts now do
-- [ ] Every `related` href resolves (no 404)
+- [x] Both posts list ≥ 2 `/blog/*` entries in `related`; all 6 posts now do
+- [x] Every `related` href resolves (no 404)
 
 **Verification:**
 
-- [ ] `grep -A8 '^related' content/blog/*.mdx | grep -c 'href: "/blog/'` per post ≥ 2
-- [ ] Open both posts in the preview; 延伸閱讀 links work
+- [x] `grep -A8 '^related' content/blog/*.mdx | grep -c 'href: "/blog/'` per post ≥ 2
+- [x] Open both posts in the preview; 延伸閱讀 links work
 
 **Dependencies:** None
 
