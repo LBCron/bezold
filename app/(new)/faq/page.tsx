@@ -6,7 +6,9 @@ import SiteFooter from "../_components/SiteFooter";
 import FaqHero from "./_components/FaqHero";
 import FaqCategory from "./_components/FaqCategory";
 import FaqCta from "./_components/FaqCta";
-import type { FaqItem } from "./_components/FaqCategory";
+import { type FaqItem, toFaqSchemaItems } from "./_components/faqItem";
+import JsonLd from "../_components/JsonLd";
+import { faqPageJsonLd } from "@/utils/structuredData";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = pageMetadata({
@@ -19,6 +21,7 @@ export const metadata: Metadata = pageMetadata({
 const platform: FaqItem[] = [
   {
     q: "刊登要錢嗎？早鳥之後怎麼收費？",
+    text: "開站慶 · 前 3 個月完全免費刊登（早鳥限定）。3 個月之後預計開始收取刊登費，金額確認後另行公告，早鳥用戶會優先通知。瀏覽永久免費 · 買賣雙方聯絡永久免費 · 成交永久不抽成。",
     a: (
       <>
         <b>開站慶 · 前 3 個月完全免費刊登</b>（早鳥限定）。
@@ -54,6 +57,7 @@ const buyer: FaqItem[] = [
   },
   {
     q: "怎麼確認店家的資訊是真的？",
+    text: "平台要求每筆刊登附上店面照片與有效聯絡方式。建議：親自到場看店，觀察實際人流與狀況；向賣家索取近 3 個月帳本或水電帳單；向房東確認租約與轉租同意。",
     a: (
       <>
         平台要求每筆刊登附上店面照片與有效聯絡方式。建議：
@@ -74,6 +78,7 @@ const buyer: FaqItem[] = [
 const seller: FaqItem[] = [
   {
     q: "頂讓金要怎麼定價才合理？",
+    text: "常見參考公式：月淨利 × 12–24 個月。租約剩餘年限長、裝潢較新、客群穩定，可往上調；反之往下。建議附上近期帳本，有數字支撐的店更容易成交，也較少被壓價。",
     a: (
       <>
         常見參考公式：<b>月淨利 × 12–24 個月</b>。
@@ -101,6 +106,7 @@ const seller: FaqItem[] = [
 const process: FaqItem[] = [
   {
     q: "頂讓金、押金、月租分別是什麼？",
+    text: "頂讓金：買方一次性付給賣方，買斷商譽、設備與裝潢殘值。押金：付給房東的可退保證金，通常為 2–3 個月租金，租約到期無損壞可退回。月租：租約接手後每月給房東的租金。三者相加才是接手一間店的完整初期資金需求。",
     a: (
       <>
         <b>頂讓金</b>：買方一次性付給賣方，買斷商譽、設備與裝潢殘值。
@@ -116,6 +122,7 @@ const process: FaqItem[] = [
   },
   {
     q: "交接時設備清點怎麼做才不會後悔？",
+    text: "交接前逐項列出設備清單（冰箱、爐台、POS 機、招牌、桌椅⋯），雙方確認數量與狀況並拍照存證，附於合約中。交接當日當場點收，有問題當場提出，簽字確認後即視為完成交接。",
     a: (
       <>
         交接前逐項列出設備清單（冰箱、爐台、POS
@@ -168,6 +175,18 @@ const digitalAssets: FaqItem[] = [
 export default function FaqPage() {
   return (
     <>
+      <JsonLd
+        data={faqPageJsonLd(
+          toFaqSchemaItems([
+            ...platform,
+            ...buyer,
+            ...seller,
+            ...process,
+            ...safety,
+            ...digitalAssets,
+          ]),
+        )}
+      />
       <LaunchBanner />
       <SiteNav activeLink="常見問題" />
       <main className={styles.frame}>

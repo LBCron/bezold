@@ -6,11 +6,9 @@ import SectionTitle from "@/components/refactored/SectionTitle";
 import type { SectionVariant } from "../../_components/Section";
 import { cn } from "@/lib/utils";
 import styles from "./FaqCategory.module.css";
+import type { FaqItem } from "./faqItem";
 
-export type FaqItem = {
-  q: string;
-  a: React.ReactNode;
-};
+export type { FaqItem };
 
 type Props = {
   sectionNum: string;
@@ -66,7 +64,11 @@ function FaqItem({
         <span>{item.q}</span>
         <span className={styles.plus}>{isOpen ? "−" : "+"}</span>
       </button>
-      {isOpen && <div className={styles.body}>{item.a}</div>}
+      {/* * always in the DOM so crawlers read the answer (FAQPage needs it on
+          the page); `hidden` keeps the accordion closed */}
+      <div className={styles.body} hidden={!isOpen}>
+        {item.a}
+      </div>
     </div>
   );
 }
