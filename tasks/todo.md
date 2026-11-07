@@ -33,16 +33,16 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] `/no-such-page` and `/store/doesNotExist` return HTTP 404
-- [ ] HTML has a robots meta with `noindex`, title `找不到頁面｜頂讓網 Bezold`, and its own description (not `SITE_DESCRIPTION`)
-- [ ] Renders with the site's fonts and colors; links to `/`, `/store-list`, `/blog` work
+- [x] `/no-such-page` and `/store/doesNotExist` return HTTP 404
+- [x] HTML has a robots meta with `noindex`, title `找不到頁面｜頂讓網 Bezold`, and its own description (not `SITE_DESCRIPTION`)
+- [x] Renders with the site's fonts and colors; links to `/`, `/store-list`, `/blog` work
 
 **Verification:**
 
-- [ ] `curl -s -o /dev/null -w '%{http_code}' localhost:3000/no-such-page` → 404
-- [ ] `curl -s localhost:3000/no-such-page | grep -o '<meta name="robots"[^>]*>'` shows `noindex`; same for `/store/doesNotExist`
-- [ ] Browser preview screenshot looks like the rest of the site (desktop + mobile)
-- [ ] eslint + prettier clean
+- [x] `curl -s -o /dev/null -w '%{http_code}' localhost:3000/no-such-page` → 404
+- [x] `curl -s localhost:3000/no-such-page | grep -o '<meta name="robots"[^>]*>'` shows `noindex`; same for `/store/doesNotExist`
+- [x] Browser preview screenshot looks like the rest of the site (desktop + mobile)
+- [x] eslint + prettier clean
 
 **Dependencies:** None
 
