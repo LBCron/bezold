@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { pageMetadata } from "@/utils/seo";
+import { pageMetadata, toMetaDescription } from "@/utils/seo";
 import styles from "./page.module.css";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
@@ -25,6 +25,8 @@ import {
 } from "@/utils/storeListPaging";
 
 const PAGE_TITLE = "全台頂讓店面列表";
+// * comfortably more than the 2 lines a card shows at any width
+const CARD_DESCRIPTION_LENGTH = 80;
 
 interface PageProps {
   searchParams: Record<string, string | string[] | undefined>;
@@ -61,10 +63,20 @@ export default async function StoreListPage({ searchParams }: PageProps) {
   const pageStores = await resolveStoreImages(result.items, {
     coverOnly: true,
   });
-  const cards = pageStores.map((store) => ({
-    id: store.id,
-    card: toCard(store),
-  }));
+  // * cards clamp the description to 2 lines — send only a preview, not the
+  // * seller's full text (it is serialized twice: HTML + RSC payload)
+  const cards = pageStores.map((store) => {
+    const card = toCard(store);
+    return {
+      id: store.id,
+      card: {
+        ...card,
+        description:
+          card.description &&
+          toMetaDescription(card.description, CARD_DESCRIPTION_LENGTH),
+      },
+    };
+  });
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   return (
