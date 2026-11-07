@@ -57,7 +57,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="zh-Hant"
+      lang="zh-Hant-TW"
       className={`${notoSansMono.variable} ${notoSansTC.variable} font-noto`}
     >
       <body>

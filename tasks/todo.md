@@ -59,14 +59,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] Footer on every `(new)` page links `/store-guide` with the label 頂讓指南, styled like its neighbors
-- [ ] `<html lang="zh-Hant-TW">`
+- [x] Footer on every `(new)` page links `/store-guide` with the label 頂讓指南, styled like its neighbors
+- [x] `<html lang="zh-Hant-TW">`
 
 **Verification:**
 
-- [ ] `curl -s localhost:3000/ | grep -o 'lang="[^"]*"\|href="/store-guide"'` shows both
-- [ ] Footer screenshot (desktop + mobile), no layout shift
-- [ ] eslint + prettier clean
+- [x] `curl -s localhost:3000/ | grep -o 'lang="[^"]*"\|href="/store-guide"'` shows both
+- [x] Footer screenshot (desktop + mobile), no layout shift
+- [x] eslint + prettier clean
 
 **Dependencies:** None
 
