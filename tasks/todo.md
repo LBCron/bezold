@@ -38,6 +38,6 @@ Each task: acceptance criteria from the matching SPEC section · verify with `np
 
 ## Checkpoint: Complete
 
-- [ ] `npm run test:unit`, tsc, eslint, `npm run build` clean; dev checks above
-- [ ] #43 comment drafted for your OK
+- [x] `npm run test:unit`, tsc, eslint, `npm run build` clean; dev checks above
+- [x] #43 comment drafted for your OK
 - [ ] You review → push → one PR
