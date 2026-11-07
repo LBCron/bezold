@@ -1,90 +1,164 @@
-# Tasks: 後台一鍵下載所有店家資料（CSV）
+# Tasks: `indexing-fixes` (SEO #102)
 
 Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
-## Task 1: CSV 產生器 + 單元測試
+## Task 1: Get blog posts into the regenerated sitemap
 
-**Description:** 新增純函式 `utils/storeCsv.ts`，把已經整理好的 `Store[]`（含 `userInfo`）轉成 SPEC 定義的 CSV 字串，並提供檔名函式。另外新增 Node 內建 test runner 的單元測試和 `test:unit` script。
+**Description:** Confirm why production `sitemap.xml` has no `/blog/*` URLs although `app/sitemap.ts` maps `getAllPostsMeta()`, then fix it. Start with the tracing hypothesis: after `npm run build`, check whether the sitemap route's `.nft.json` lists `content/blog/*.mdx`. If it doesn't, add `experimental.outputFileTracingIncludes` for the sitemap route. If tracing isn't the cause, switch to the pre-approved fallback (build-time JSON of blog metadata, imported by the sitemap).
 
 **Acceptance criteria:**
 
-- [x] `toStoreCsv(stores, { appUrl })` 回傳開頭是 BOM 的字串，換行用 CRLF，標題列的 30 個欄位順序和 SPEC 的表格一樣
-- [x] 跳脫、空值、陣列 `|`、布林、台北時間 `YYYY-MM-DD HH:mm`、公式前綴 `'`（只加在自由文字欄位），都符合 SPEC
-- [x] `exportFileName(now)` 用台北日期回傳 `bezold-sellers-YYYYMMDD.csv`
+- [ ] Root cause written down with evidence (trace contents before/after, or the fallback's reason) for the PR description
+- [ ] After the fix, the sitemap route's trace (or bundle) includes the blog metadata source
+- [ ] Each blog URL keeps `lastModified` from `updatedAt`
 
 **Verification:**
 
-- [x] `npm run test:unit` 通過，涵蓋 SPEC T1 列出的每一種情況
-- [x] `npx prettier --write`、lint 0 錯誤
+- [ ] `npm run build` succeeds
+- [ ] `find .next/server/app -name '*.nft.json' -path '*sitemap*' -exec grep -l 'content/blog' {} \;` prints the sitemap trace (tracing route)
+- [ ] Final proof at Checkpoint B: preview deployment `curl -s <preview>/sitemap.xml | grep -c '/blog/'` → 6
 
 **Dependencies:** None
 
 **Files likely touched:**
 
-- `utils/storeCsv.ts`（新增）
-- `tests/unit/storeCsv.test.ts`（新增）
-- `package.json`（`test:unit`）
+- `next.config.js`
+- `app/sitemap.ts` (only if the fallback is needed, plus a generator under `scripts/` and `package.json` prebuild)
 
-**Estimated scope:** Small
+**Estimated scope:** XS (S with fallback)
 
-## Task 2: Export API
+## Task 2: Root 404 page with noindex
 
-**Description:** 新增 `getStoresForExport()`：讀取草稿以外的全部店家，再批次讀進賣家資料（沒有 email 的用 Auth email 補）。新增 `GET /api/admin/stores/export`：檢查管理員權限 → 把 `status`／`listingType` 整理好 → `toStoreCsv` → 寫 `admin_store_export` log → 回傳附件。另外把 `bezold-sellers-*.csv` 加進 `.gitignore`。
-
-**Acceptance criteria:**
-
-- [x] 不帶 token 回 401；非管理員回 403；管理員回 200，有 `Content-Type: text/csv; charset=utf-8`、`Content-Disposition: attachment; filename="bezold-sellers-YYYYMMDD.csv"`、`Cache-Control: no-store`、`X-Row-Count`
-- [x] 資料列數 = mock 裡草稿以外的店家數；`id` 不重複；賣家欄位和後台 drawer 一致
-- [x] 每次成功下載都寫一行 `admin_store_export` JSON log（adminUid、adminEmail、rowCount、exportedAt），裡面沒有店家資料
-
-**Verification:**
-
-- [x] 確認 `.env.development` 的 `NEXT_PUBLIC_ENV_VERSION=dev` 後跑 `npm run dev`
-- [x] 用 curl 檢查 401；用管理員 token 檢查 200 和 header（SPEC T5）
-- [ ] 403（非管理員 token）：沒有非管理員測試帳號，未實測；沿用既有的 `verifyAdminToken`
-- [x] dev server 終端機出現 log 行（SPEC T6）
-- [x] `npm run build` 通過
-
-**Dependencies:** Task 1
-
-**Files likely touched:**
-
-- `firebase/serverUtils/store.ts`（`getStoresForExport`）
-- `app/api/admin/stores/export/route.ts`（新增）
-- `.gitignore`
-
-**Estimated scope:** Small
-
-## Checkpoint: API
-
-- [x] `npm run test:unit` 通過
-- [x] curl 401／403／200 正確，log 行正確
-
-## Task 3: 後台下載按鈕
-
-**Description:** 在 `/admin/store/list` 工具列最後加一顆「下載所有店家資料（CSV）」的 `AntButton`。按下後用 `authedFetch` 拿 blob，用暫時的 object URL 觸發下載（檔名取自 `Content-Disposition`）。下載中顯示 loading，`idToken` 還沒拿到時 disabled，成功和失敗都要有訊息。
+**Description:** Add `app/not-found.tsx` so unmatched URLs and `notFound()` calls render a branded 404 that tells crawlers not to index it. It uses the page shell (`LaunchBanner`, `SiteNav`, `SiteFooter`), a short message, and links to `/`, `/store-list`, `/blog`. Wrap it in the `(new)` root class so the design tokens apply.
 
 **Acceptance criteria:**
 
-- [x] 按一下就下載 `bezold-sellers-YYYYMMDD.csv`，不受搜尋、篩選、分頁、勾選影響
-- [x] 下載中按鈕是 loading、不能重複按；成功顯示「已下載 N 筆」，失敗顯示「下載失敗，請稍後再試」
-- [x] 下載後 object URL 有 revoke
+- [ ] `/no-such-page` and `/store/doesNotExist` return HTTP 404
+- [ ] HTML has a robots meta with `noindex`, title `找不到頁面｜頂讓網 Bezold`, and its own description (not `SITE_DESCRIPTION`)
+- [ ] Renders with the site's fonts and colors; links to `/`, `/store-list`, `/blog` work
 
 **Verification:**
 
-- [x] 瀏覽器實際下載；用 Excel／Numbers 打開，中文正常、欄位對齊、有換行的描述留在同一格（SPEC T2）
-- [x] 列數 = 後台列表「所有狀態＋所有類型」的總數；抽 3 筆和 drawer 比對（SPEC T3、T4）
-- [x] lint 0 錯誤、`npm run build` 通過（SPEC T7）
+- [ ] `curl -s -o /dev/null -w '%{http_code}' localhost:3000/no-such-page` → 404
+- [ ] `curl -s localhost:3000/no-such-page | grep -o '<meta name="robots"[^>]*>'` shows `noindex`; same for `/store/doesNotExist`
+- [ ] Browser preview screenshot looks like the rest of the site (desktop + mobile)
+- [ ] eslint + prettier clean
 
-**Dependencies:** Task 2
+**Dependencies:** None
 
 **Files likely touched:**
 
-- `app/admin/store/list/page.tsx`
+- `app/not-found.tsx` (new)
+- `app/not-found.module.css` (new)
+
+**Estimated scope:** S
+
+## Task 3: Footer 頂讓指南 link + `lang="zh-Hant-TW"`
+
+**Description:** Add a 頂讓指南 → `/store-guide` link to `SiteFooter` (next to 創業部落格 / 常見問題) and change `<html lang>` in the root layout to `zh-Hant-TW`.
+
+**Acceptance criteria:**
+
+- [ ] Footer on every `(new)` page links `/store-guide` with the label 頂讓指南, styled like its neighbors
+- [ ] `<html lang="zh-Hant-TW">`
+
+**Verification:**
+
+- [ ] `curl -s localhost:3000/ | grep -o 'lang="[^"]*"\|href="/store-guide"'` shows both
+- [ ] Footer screenshot (desktop + mobile), no layout shift
+- [ ] eslint + prettier clean
+
+**Dependencies:** None
+
+**Files likely touched:**
+
+- `app/(new)/_components/SiteFooter.tsx`
+- `app/layout.tsx`
 
 **Estimated scope:** XS
 
-## Checkpoint: Complete
+## Checkpoint A: After Tasks 1–3
 
-- [x] SPEC T1–T7 全部通過
-- [x] 停下讓你看過，再 commit；一個 PR，描述連結 #99，不貼任何真實資料
+- [ ] `npm run build` succeeds; sitemap trace contains blog sources
+- [ ] 404 noindex + footer link + lang verified locally
+- [ ] Local commit per task
+
+## Task 4: `pickRelatedStores()` pure function + unit tests
+
+**Description:** Test-first, add a pure function in `utils/` that takes the current store, same-city candidates and same-category candidates, and returns up to `limit` (default 6) related stores. Same city first, then same category, deduped, never the current store, only approved physical listings. Add `limit` / `excludeId`-style options to `getStores()` that apply in memory before image signing, so the page signs only the covers it shows.
+
+**Acceptance criteria:**
+
+- [ ] Same-city stores come first, topped up from same-category stores, no duplicates, max `limit`
+- [ ] Excludes the current store and anything not `APPROVED` or digital
+- [ ] Returns `[]` when nothing matches; stores without `city` or `category` skip that source
+
+**Verification:**
+
+- [ ] `npm run test:unit` — new `tests/unit/relatedStores.test.ts` passes (written failing first)
+- [ ] Existing `storeCsv` tests still pass; eslint + prettier clean
+
+**Dependencies:** None
+
+**Files likely touched:**
+
+- `utils/relatedStores.ts` (new)
+- `tests/unit/relatedStores.test.ts` (new)
+- `firebase/serverUtils/store.ts` (`getStores` options + `getRelatedStores` wrapper)
+
+**Estimated scope:** S
+
+## Task 5: Related-stores section on store pages
+
+**Description:** Render 「你可能也有興趣」 at the bottom of physical store pages using `getRelatedStores()` from Task 4 and `FeaturedListings` (or a thin wrapper if its props don't fit). Data passes through `omitSellerContact()`. Digital-asset pages and stores with 0 matches render nothing.
+
+**Acceptance criteria:**
+
+- [ ] Physical store page shows 4–6 related store cards linking to `/store/<id>`, never the current store
+- [ ] Section absent on digital-asset pages and when there are no matches
+- [ ] Served HTML of the section has no seller phone, LINE, Threads or email
+
+**Verification:**
+
+- [ ] Browser preview: a store in a busy city (cards shown), a store with no matches (hidden), a 面議 store, a digital asset (hidden)
+- [ ] `curl -s localhost:3000/store/<id>` → no seller contact strings in the related cards
+- [ ] No new Firestore index error in the server logs; `npm run build` succeeds
+
+**Dependencies:** Task 4
+
+**Files likely touched:**
+
+- `app/(new)/store/[storeId]/page.tsx`
+- `app/(new)/store/[storeId]/_components/RelatedStores.tsx` (new, only if a wrapper is needed)
+
+**Estimated scope:** S
+
+## Task 6: Second related post on 2 blog posts
+
+**Description:** `first-business` and `how-to-pay-takeover-fee` each link only one other post in frontmatter `related`. Add a relevant second `/blog/*` post to each, keeping their existing entries.
+
+**Acceptance criteria:**
+
+- [ ] Both posts list ≥ 2 `/blog/*` entries in `related`; all 6 posts now do
+- [ ] Every `related` href resolves (no 404)
+
+**Verification:**
+
+- [ ] `grep -A8 '^related' content/blog/*.mdx | grep -c 'href: "/blog/'` per post ≥ 2
+- [ ] Open both posts in the preview; 延伸閱讀 links work
+
+**Dependencies:** None
+
+**Files likely touched:**
+
+- `content/blog/first-business.mdx`
+- `content/blog/how-to-pay-takeover-fee.mdx`
+
+**Estimated scope:** XS
+
+## Checkpoint B: Complete
+
+- [ ] Every spec acceptance criterion met locally
+- [ ] `npm run test:unit`, `npm run build`, eslint, prettier clean
+- [ ] User reviews the local commits
+- [ ] With the user's OK: push branch → Vercel preview `sitemap.xml` has 6 `/blog/` URLs → open PR for #102 (`Closes #102`)
