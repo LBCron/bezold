@@ -75,7 +75,7 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
             新店面每週持續上架 · 歡迎告訴我們你在找什麼，我們幫你留意
           </div>
         </div>
-        <a href="/store-guide#contact" className={styles.saveCtaBtn}>
+        <a href="/contact" className={styles.saveCtaBtn}>
           聯絡我們
         </a>
       </div>
