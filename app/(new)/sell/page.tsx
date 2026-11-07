@@ -4,6 +4,11 @@ import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
 import EmailVerifiedGate from "@/app/(new)/_components/EmailVerifiedGate";
 import SellForm from "./_components/SellForm";
+import SellGuide from "./_components/SellGuide";
+import JsonLd from "@/app/(new)/_components/JsonLd";
+import { platformFaq, sellerFaq } from "@/app/(new)/faq/_components/faqData";
+import { toFaqSchemaItems } from "@/app/(new)/faq/_components/faqItem";
+import { faqPageJsonLd } from "@/utils/structuredData";
 import { LISTING_TYPE } from "@/types";
 import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 import styles from "./page.module.css";
@@ -22,11 +27,15 @@ export default function SellPage({
   // * the homepage / list page 「刊登數位資產」 links land on ?type=digital
   const isDigital = searchParams.type === LISTING_TYPE.DIGITAL;
   const sellPath = isDigital ? "/sell?type=digital" : "/sell";
+  // * the listing guide is about physical stores — the digital form has its
+  // * own rules inline
+  const sellFaq = [...platformFaq, ...sellerFaq];
 
   return (
     <>
+      {!isDigital && <JsonLd data={faqPageJsonLd(toFaqSchemaItems(sellFaq))} />}
       <SiteNav activeLink="我要頂出" />
-      <main className={styles.main}>
+      <main id="sell-form" className={styles.main}>
         <h1 className={styles.heading}>
           限時<strong>免費刊登</strong>
         </h1>
@@ -51,6 +60,7 @@ export default function SellPage({
           />
         </EmailVerifiedGate>
       </main>
+      {!isDigital && <SellGuide faqItems={sellFaq} />}
       <SiteFooter />
     </>
   );

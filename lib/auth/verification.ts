@@ -50,7 +50,10 @@ export async function sendVerification(
     window.location.origin,
   );
   await sendEmailVerification(user, { url: continueUrl.toString() });
-  trackEvent("verification_email_sent", { trigger, source });
+  trackEvent("verification_email_sent", {
+    trigger,
+    entry_point: source,
+  });
 }
 
 // user.emailVerified and the ID token's email_verified claim both stay stale

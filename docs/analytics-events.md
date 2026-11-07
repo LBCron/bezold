@@ -14,6 +14,13 @@ with `send_page_view: false` so gtag doesn't also send one on load. In the GA4
 console, keep Enhanced measurement → Page views → "Page changes based on browser
 history events" **off**, or every client-side navigation is counted twice.
 
+**Never name an event parameter `source`, `medium`, `campaign`, `term` or
+`content`.** GA4 reads those as traffic-source fields, so an event carrying
+them rewrites the session's source / medium — until 2026-11 the buyer club
+events sent `source: "fab"` etc. and GA4 reported `fab`, `contact_gate_blur`
+and `auto` as session sources. The entry point is sent as `entry_point`
+instead (register it as an event-scoped custom dimension in GA4 Admin).
+
 ---
 
 ## Event reference
@@ -24,16 +31,16 @@ history events" **off**, or every client-side navigation is counted twice.
 | `sell_cta_click`               | User clicks any "免費刊登" CTA                                                                    | `cta_location`                                               | See CTA table below                                                                                |
 | `store_listing_submit`         | A store listing is **successfully created** (after the Firestore write)                           | `store_id`, `category`, `city`, `listing_type`               | [`SellForm.tsx`](<../app/(new)/sell/_components/SellForm.tsx>)                                     |
 | `store_listing_edit`           | A store listing is **successfully updated** (after the Firestore write)                           | `store_id`, `category`, `city`, `listing_type`               | [`EditListingForm.tsx`](<../app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx>) |
-| `sign_up`                      | An account is **successfully created** (auth + user doc)                                          | `method` (`"email"`), `source`                               | [`signup.ts`](../lib/auth/signup.ts) (every signup surface)                                        |
-| `verification_email_sent`      | A verification email is sent (signup or resend)                                                   | `trigger`, `source`                                          | [`verification.ts`](../lib/auth/verification.ts)                                                   |
+| `sign_up`                      | An account is **successfully created** (auth + user doc)                                          | `method` (`"email"`), `entry_point`                          | [`signup.ts`](../lib/auth/signup.ts) (every signup surface)                                        |
+| `verification_email_sent`      | A verification email is sent (signup or resend)                                                   | `trigger`, `entry_point`                                     | [`verification.ts`](../lib/auth/verification.ts)                                                   |
 | `email_verified`               | The first time this page session sees the account flip to verified                                | `detected_by` (`page_load` / `manual_check`)                 | [`useEmailVerification.ts`](../hooks/useEmailVerification.ts)                                      |
 | `newsletter_view`              | The homepage newsletter block scrolls into view                                                   | `location` (`"home_after_hero"`)                             | [`Newsletter.tsx`](<../app/(new)/_components/Newsletter.tsx>)                                      |
 | `acceleration_cta_click`       | User clicks any 頂讓加速包 (acceleration package) CTA                                             | `plan`                                                       | See CTA table below                                                                                |
 | `editor_pick_guide_click`      | User clicks a link to the 編輯精選 rules page (`/policy/editor-pick`)                             | `location`                                                   | See location table below                                                                           |
 | `editor_pick_extend_click`     | On the 編輯精選 page, user clicks "了解延長精選" (→ LINE)                                         | —                                                            | [`EpExposure.tsx`](<../app/(new)/policy/editor-pick/_components/EpExposure.tsx>)                   |
 | `editor_pick_cta_click`        | On the 編輯精選 page, user clicks the final CTA "前往我的刊登"                                    | `cta_location` (`"final"`)                                   | [`EpFinalCta.tsx`](<../app/(new)/policy/editor-pick/_components/EpFinalCta.tsx>)                   |
-| `buyer_club_popup_impression`  | The buyer club popup opens, however it was opened                                                 | `source`                                                     | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
-| `buyer_club_popup_dismiss`     | The popup is closed without signing up                                                            | `source`                                                     | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
+| `buyer_club_popup_impression`  | The buyer club popup opens, however it was opened                                                 | `entry_point`                                                | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
+| `buyer_club_popup_dismiss`     | The popup is closed without signing up                                                            | `entry_point`                                                | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
 | `contact_gate_view`            | A logged-out visitor sees the locked seller contact block (once per page view)                    | `store_id`                                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
 | `contact_gate_click`           | One of the three locks on the seller contact block is clicked                                     | `store_id`, `trigger`                                        | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
 | `seller_contact_phone`         | A **signed-in** member taps 「撥打賣家電話」 (unlocked)                                           | `store_id`                                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
@@ -46,10 +53,10 @@ history events" **off**, or every client-side navigation is counted twice.
 > Conversion events (`store_listing_submit`, `sign_up`) fire **only on success**,
 > so failed or invalid attempts are not counted.
 
-### Buyer club `source` / `contact_gate_click` `trigger` values
+### Buyer club `entry_point` / `contact_gate_click` `trigger` values
 
 One popup serves two jobs: the daily invitation to join the buyer club, and the
-unlock step for a seller's contact details. `source` is what separates them —
+unlock step for a seller's contact details. `entry_point` is what separates them —
 in GA4 it answers "does the contact gate convert better than the auto-open?".
 
 | Value                    | Where it comes from                                |
@@ -64,7 +71,7 @@ in GA4 it answers "does the contact gate convert better than the auto-open?".
 
 The same three `contact_gate_*` values are the `trigger` on
 `contact_gate_click`, and a signup that starts there carries them on `sign_up`
-as `source` — so the funnel view → click → sign_up can be read per entry point.
+as `entry_point` — so the funnel view → click → sign_up can be read per entry point.
 
 ---
 
@@ -73,18 +80,18 @@ as `source` — so the funnel view → click → sign_up can be read per entry p
 The funnel `sign_up` → `verification_email_sent` (`trigger: "signup"`) →
 `email_verified` shows how many new accounts finish verifying.
 
-| Parameter     | Value               | Meaning                                                                       |
-| ------------- | ------------------- | ----------------------------------------------------------------------------- |
-| `trigger`     | `signup`            | Sent automatically right after the account was created                        |
-| `trigger`     | `resend`            | The user pressed 「重新寄送驗證信」                                           |
-| `source`      | _signup `source`_   | With `trigger: "signup"`, the same `source` as that account's `sign_up` event |
-| `source`      | `verify_email_page` | Resent from `/verify-email`                                                   |
-| `source`      | `buyer_club_popup`  | Resent from the buyer club popup's check-your-inbox step                      |
-| `source`      | `sell_gate`         | Resent from the gate on `/sell`                                               |
-| `source`      | `my_listings_gate`  | Resent from the gate on `/my-listings`                                        |
-| `source`      | `edit_listing_gate` | Resent from the gate on `/my-listings/edit/[storeId]`                         |
-| `detected_by` | `page_load`         | Noticed by the automatic re-check (page load or returning to the tab)         |
-| `detected_by` | `manual_check`      | Noticed when the user pressed 「我已完成驗證」                                |
+| Parameter     | Value                  | Meaning                                                                            |
+| ------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| `trigger`     | `signup`               | Sent automatically right after the account was created                             |
+| `trigger`     | `resend`               | The user pressed 「重新寄送驗證信」                                                |
+| `entry_point` | _signup `entry_point`_ | With `trigger: "signup"`, the same `entry_point` as that account's `sign_up` event |
+| `entry_point` | `verify_email_page`    | Resent from `/verify-email`                                                        |
+| `entry_point` | `buyer_club_popup`     | Resent from the buyer club popup's check-your-inbox step                           |
+| `entry_point` | `sell_gate`            | Resent from the gate on `/sell`                                                    |
+| `entry_point` | `my_listings_gate`     | Resent from the gate on `/my-listings`                                             |
+| `entry_point` | `edit_listing_gate`    | Resent from the gate on `/my-listings/edit/[storeId]`                              |
+| `detected_by` | `page_load`            | Noticed by the automatic re-check (page load or returning to the tab)              |
+| `detected_by` | `manual_check`         | Noticed when the user pressed 「我已完成驗證」                                     |
 
 ---
 

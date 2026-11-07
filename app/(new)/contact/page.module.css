@@ -1,0 +1,12 @@
+.line {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.qr {
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  background: var(--paper);
+}

@@ -24,6 +24,7 @@ import DigitalHolderCard from "./_components/DigitalHolderCard";
 import DigitalTransferNotes from "./_components/DigitalTransferNotes";
 import BuyerClubPopup from "./_components/BuyerClubPopup";
 import JsonLd from "@/app/(new)/_components/JsonLd";
+import { breadcrumbJsonLd } from "@/utils/structuredData";
 import styles from "./page.module.css";
 
 interface StorePageProps {
@@ -112,6 +113,16 @@ export default async function StoreDetailPage({
 
   return (
     <>
+      {/* * mirrors StoreBreadcrumb — every store page, priced or not */}
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "首頁", url: `${appUrl}/` },
+          isDigital
+            ? { name: "數位資產", url: `${appUrl}/digital-assets` }
+            : { name: "我要找店", url: `${appUrl}/store-list` },
+          { name: store.storeName },
+        ])}
+      />
       {offer && (
         <JsonLd
           data={{

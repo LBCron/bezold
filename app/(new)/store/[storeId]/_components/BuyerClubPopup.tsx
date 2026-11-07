@@ -140,7 +140,9 @@ export default function BuyerClubPopup({
         // (otherwise every store page would re-open it and re-fire impressions).
         // A force-open (ad landing) deliberately doesn't consume the cap.
         if (!forceOpen) markSuppressed();
-        trackEvent("buyer_club_popup_impression", { source: autoSource });
+        trackEvent("buyer_club_popup_impression", {
+          entry_point: autoSource,
+        });
       }
     });
     return () => {
@@ -207,7 +209,7 @@ export default function BuyerClubPopup({
     // A popup the visitor opened themselves must not consume the day's
     // auto-open allowance — the cap only governs uninvited interruptions.
     if (!isVisitorOpened) markSuppressed();
-    trackEvent("buyer_club_popup_dismiss", { source });
+    trackEvent("buyer_club_popup_dismiss", { entry_point: source });
   }
 
   const strength = getStrength(password);
@@ -285,7 +287,9 @@ export default function BuyerClubPopup({
         onClick={() => {
           setSource("fab");
           setOpen(true);
-          trackEvent("buyer_club_popup_impression", { source: "fab" });
+          trackEvent("buyer_club_popup_impression", {
+            entry_point: "fab",
+          });
         }}
         aria-label="尋找適合你的下一間店"
       >

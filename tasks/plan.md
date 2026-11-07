@@ -1,36 +1,33 @@
-# Implementation Plan: `store-metadata` (SEO #103)
+# Implementation Plan: remaining SEO/AEO modules (#104, #105, #106, #101 GA)
 
-Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md) · Issue: [v-salvator/bezold#103](https://github.com/v-salvator/bezold/issues/103) (parent [#101](https://github.com/v-salvator/bezold/issues/101))
+Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md) · Parent: [v-salvator/bezold#101](https://github.com/v-salvator/bezold/issues/101)
 
 ## Overview
 
-Store pages get titles and descriptions built from a template using the listing's structured data, instead of the seller's text cut off mid-sentence. /store-guide gets a description that defines 頂讓 in its first sentence. This branch is stacked on #110 (`indexing-fixes`).
+All five remaining modules ship in one PR, stacked on #111 (`store-metadata`). Build order follows the capability map: shared JSON-LD builders first, because `sell-content` and `store-list-paging` reuse them.
 
 ## Architecture Decisions
 
-- **Pure builders in `utils/storeMeta.ts`** take already-resolved strings (place label, fee label, facts, location, seller text) and have no runtime `@/` imports, so `node --test` can load them. Same pattern as `utils/storeCsv.ts`.
-- **`utils/seo.ts` adapts a `Store`** to those inputs using the existing `STORE_CATEGORIES`, `EQUIPMENT_LABEL`, `formatPriceDisplay` and `formatPrice`, so price wording stays the same as on the cards.
-- **Digital assets keep their current title and description.** Only the physical path changes.
-- **One string for page and Open Graph.** `og:description` drops its separate 200-character cut and uses the same ≤ 150-character description.
+- **Pure helpers, unit-tested**: `utils/structuredData.ts` (JSON-LD) and `utils/storeListPaging.ts` (page/sort parsing, sorting, slicing). No runtime `@/` imports.
+- **FAQ text is type-enforced**: `FaqItem` becomes `{ q, a: string } | { q, a: ReactNode, text: string }`, so a JSX answer can't ship without its schema text.
+- **/sell content is server-rendered outside `EmailVerifiedGate`**, so crawlers and signed-out visitors see it.
+- **`/llms.txt` is a `force-static` route handler**: generated at build time from `getAllPostsMeta()`, so it never reads files at runtime (unlike the sitemap bug in #110).
+- **/store-list sorts and pages on the server**: the client `ResultsArea` gets card data for one page only; sort and page live in the URL; `Pagination` is a new shared primitive.
+- **GA**: rename the `source` param to `entry_point`. Values stay the same, so funnels keep their meaning.
 
 ## Task List
 
-- [ ] Task 1: Pure title/description builders + unit tests
-- [ ] Task 2: Store pages use the builders
-- [ ] Task 3: /store-guide description
-
-### Checkpoint: Complete
-
-- [ ] Unit tests, tsc, lint, build clean; dev-server checks on priced / 面議 / free / sold / digital stores
-- [ ] You review → push → PR for #103
+See `tasks/todo.md` (T1–T12, checkpoints after each module).
 
 ## Risks and Mitigations
 
-| Risk                                                           | Impact | Mitigation                                                                                                                          |
-| -------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Emoji regex misses some symbols or strips CJK punctuation      | Low    | Use `\p{Extended_Pictographic}` + variation selectors / ZWJ only; unit-test with the 蘆洲 listing's ✨🔥 and full-width punctuation |
-| Mock data lacks some field combinations                        | Low    | Unit tests cover every combination; dev check covers what mock data has                                                             |
-| Stacked on #110: PR diff includes #110 commits until it merges | Low    | Open the PR against `main` and say so in the body; the diff shrinks once #110 merges                                                |
+| Risk                                                            | Impact | Mitigation                                                                                        |
+| --------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| FAQ schema text drifts from the visible JSX answer              | Med    | Type forces `text` next to the JSX; reviewed side by side in the diff                             |
+| Server-side sort/paging breaks SearchBar or ActiveFilters       | Med    | Keep URL params as source of truth; keep the hydration effect; test filter + sort + page together |
+| Store-list size can only be measured with production data       | Med    | Local per-card estimate; you check `wc -c` after deploy                                           |
+| Renaming `source` breaks GA4 reports that use the old dimension | Low    | Same values under `entry_point`; you register the new dimension; documented                       |
+| One big PR is slow to review                                    | Med    | One commit per task, grouped by module, so it can be reviewed commit by commit                    |
 
 ## Open Questions
 

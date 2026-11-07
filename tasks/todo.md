@@ -1,77 +1,43 @@
-# Tasks: `store-metadata` (SEO #103)
+# Tasks: remaining SEO/AEO modules (#104, #105, #106, #101 GA)
 
 Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
-## Task 1: Pure title/description builders + unit tests
+Each task: acceptance criteria from the matching SPEC section · verify with `npm run test:unit` (where there are tests), tsc, eslint, prettier, and a dev-server check · one commit.
 
-**Description:** Test-first, add `utils/storeMeta.ts` with `buildStoreTitle()` and `buildStoreDescription()` (plus an emoji-stripping helper) that take already-resolved strings and return the spec's title and description.
+## structured-data (#104)
 
-**Acceptance criteria:**
+- [x] **T1 JSON-LD builders + unit tests**: `faqPageJsonLd`, `breadcrumbJsonLd`, `itemListPageJsonLd` in `utils/structuredData.ts`; `tests/unit/structuredData.test.ts` written first. Files: 2.
+- [x] **T2 /faq FAQPage**: `FaqItem` type requires `text` for JSX answers; page emits one FAQPage over all questions. Verify: JSON-LD parses; question count = Question count. Files: `faq/page.tsx`, `FaqCategory.tsx`.
+- [x] **T3 Store BreadcrumbList**: every store page (physical / digital / sold) emits a breadcrumb that mirrors `StoreBreadcrumb`. Files: store `page.tsx`.
+- [x] **T4 ItemList on /digital-assets and /blog**: CollectionPage + ItemList of absolute URLs in display order. Files: 2 pages.
 
-- [x] Title: 【頂讓】 or 【已頂讓】 + name + `｜{city}{district}{categoryLabel}店面頂讓`, with missing parts skipped cleanly
-- [x] Description: facts sentence (sold variant without fee), then the emoji-free seller excerpt, ≤ 150 chars, `…` when cut, excerpt dropped when < 20 chars of space remain
-- [x] Emoji, pictographs, variation selectors and ZWJ removed; CJK text and full-width punctuation kept
+**Checkpoint A**: unit tests, tsc, lint clean; JSON-LD parses on /faq, a store page, /digital-assets, /blog.
 
-**Verification:**
+## sell-content (#105)
 
-- [x] `npm run test:unit` — `tests/unit/storeMeta.test.ts` written failing first, then passes; existing tests still pass
-- [x] eslint + prettier clean
+- [x] **T5 /sell content + FAQPage**: steps, fees, rules, 5–8 FAQ, CTA, rendered outside the gate; signed-out body ≥ 800 CJK chars. Files: `sell/page.tsx`, new `sell/_components/SellGuide.tsx` (+ css).
+- [x] **T6 「頂讓」 anchor links**: homepage body → /store-guide, /store-guide → `/`. Files: one home section, `GuideCta.tsx`.
 
-**Dependencies:** None
+## trust-pages (#106)
 
-**Files likely touched:**
+- [x] **T7 `/llms.txt`**: force-static route handler from `getAllPostsMeta()`. Verify: 200 `text/plain`, lists all 6 posts; build output marks it static.
+- [x] **T8 /about + /contact**: pages, footer links, sitemap entries, store-list 「聯絡我們」 → `/contact`. Verify: 200, screenshots desktop + mobile.
+- [x] **T9 Organization contactPoint + address country**: home JSON-LD. Verify: parses.
 
-- `utils/storeMeta.ts` (new)
-- `tests/unit/storeMeta.test.ts` (new)
+**Checkpoint B**: build passes; /sell signed-out char count; /llms.txt, /about, /contact return 200.
 
-**Estimated scope:** S
+## store-list-paging (#106)
 
-## Task 2: Store pages use the builders
+- [x] **T10 Paging helpers + unit tests**: `parsePage`, `parseSort`, `sortStores`, `paginate`, `pageHref` in `utils/storeListPaging.ts`; tests first.
+- [x] **T11 Pagination primitive**: `components/refactored/Pagination.tsx` + css; crawlable links, `aria-current`, hidden for 1 page.
+- [x] **T12 /store-list on server paging**: server sorts + pages; `ResultsArea` gets one page of cards; sort dropdown pushes URL; SearchBar keeps sort, resets page; H3 titles; canonical/title for page > 1; out-of-range 404; ItemList for the current page. Verify: filters + sort + page combinations, SearchBar hydration, per-card byte estimate.
 
-**Description:** In `utils/seo.ts`, change `storePageTitle()` and add `storePageDescription()` so a physical `Store` is mapped to builder inputs (category label, fee label via `formatPriceDisplay`, 坪, 月租 via `formatPrice`, `EQUIPMENT_LABEL`, `location`, status). Digital assets keep their current title and description. `generateMetadata` uses them for the page and Open Graph.
+## ga-attribution (#101)
 
-**Acceptance criteria:**
-
-- [x] Physical store pages render the template title and description in `<title>`, `meta description`, `og:title`, `og:description`
-- [x] Digital-asset pages are unchanged
-- [x] No other caller of the changed helpers breaks
-
-**Verification:**
-
-- [x] `tsc --noEmit` clean
-- [x] Dev server: curl a priced, a 面議, a 免頂讓金, a sold (if mock has one) and a digital store; title, description and og tags match the spec
-
-**Dependencies:** Task 1
-
-**Files likely touched:**
-
-- `utils/seo.ts`
-- `app/(new)/store/[storeId]/page.tsx`
-
-**Estimated scope:** S
-
-## Task 3: /store-guide description
-
-**Description:** Replace the /store-guide description with one that defines 頂讓 first, reusing the hero's definition, and mentions the 4-step flow. Title unchanged.
-
-**Acceptance criteria:**
-
-- [x] The description's first sentence answers 「頂讓是什麼」; the title is unchanged
-
-**Verification:**
-
-- [x] `curl -s localhost:3000/store-guide | grep -o '<meta name="description"[^>]*>'`
-
-**Dependencies:** None
-
-**Files likely touched:**
-
-- `app/(new)/store-guide/page.tsx`
-
-**Estimated scope:** XS
+- [x] **T13 Rename `source` → `entry_point`**: 4 events + `docs/analytics-events.md`. Verify: grep shows no `trackEvent` with `source` / `medium` / `campaign` / `term` / `content`.
 
 ## Checkpoint: Complete
 
-- [x] `npm run test:unit`, `tsc`, eslint, `npm run build` clean
-- [ ] You review the local commits
-- [ ] With your OK: push → PR for #103 (`Refs #103`)
+- [x] `npm run test:unit`, tsc, eslint, `npm run build` clean; dev checks above
+- [x] #43 comment drafted for your OK
+- [ ] You review → push → one PR

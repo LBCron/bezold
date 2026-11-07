@@ -132,6 +132,12 @@ export default function SiteFooter() {
         <h2>關於 / 支援</h2>
         <ul>
           <li>
+            <a href="/about">關於我們</a>
+          </li>
+          <li>
+            <a href="/contact">聯絡我們</a>
+          </li>
+          <li>
             <a href="/store-guide">頂讓指南</a>
           </li>
           <li>

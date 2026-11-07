@@ -3,6 +3,8 @@ import { pageMetadata } from "@/utils/seo";
 import LaunchBanner from "../_components/LaunchBanner";
 import SiteNav from "../_components/SiteNav";
 import SiteFooter from "../_components/SiteFooter";
+import JsonLd from "../_components/JsonLd";
+import { itemListPageJsonLd } from "@/utils/structuredData";
 import BlogCard from "./_components/BlogCard";
 import { getAllPostsMeta } from "@/lib/blog";
 import styles from "./page.module.css";
@@ -18,9 +20,17 @@ export const metadata: Metadata = pageMetadata({
 
 export default function BlogIndexPage() {
   const posts = getAllPostsMeta();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   return (
     <>
+      <JsonLd
+        data={itemListPageJsonLd({
+          name: "創業部落格",
+          url: `${appUrl}/blog`,
+          itemUrls: posts.map(({ slug }) => `${appUrl}/blog/${slug}`),
+        })}
+      />
       <LaunchBanner />
       <SiteNav activeLink="部落格" />
       <div className="flex-1">

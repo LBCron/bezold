@@ -40,6 +40,8 @@ export default function HowItWorks() {
         num="08"
         title="運作方式 · 簡單兩步"
         sub="— 我們先把買賣雙方湊在一起，剩下你們自己談 —"
+        more="第一次頂讓？看頂讓指南 →"
+        moreHref="/store-guide"
         dark
       />
       <div className={"grid gap-4 relative grid-cols-2 lg:grid-cols-4"}>

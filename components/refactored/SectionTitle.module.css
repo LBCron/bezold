@@ -61,4 +61,9 @@
   color: var(--ink);
   text-decoration: underline wavy var(--accent);
   cursor: pointer;
+
+  /* nested for the same reason as .numDark — beats Section's `.dark *` */
+  &.moreDark {
+    color: var(--paper);
+  }
 }
