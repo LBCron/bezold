@@ -137,3 +137,16 @@ URL params are the source of truth for filter state in `/store-list`. Two rules:
 1. **Navigation into store-list** — always build a `URLSearchParams` object and call `router.push('/store-list?...')`. Never write to Jotai atoms cross-page. Supported params: `city`, `category`, `tag`, `amountMin`, `amountMax`.
 
 2. **SearchBar hydration** — `SearchBar.tsx` runs a `useEffect([], [])` on mount that reads `useSearchParams()` and sets `cityAtom`, `tagAtom`, `categoryAtom`, `amountFilterAtom` so the dropdowns reflect the current URL. This must be preserved whenever SearchBar is modified.
+
+## Pull requests
+
+### Before/after screenshots
+
+Any PR that changes what a page shows (UI, layout, or user-facing copy) gets before/after screenshots in its description. Use the `before-and-after` skill: capture with `agent-browser`, format with its `format.mjs`, upload with `gh pr edit --attach`. Changes with nothing to look at (`/llms.txt`, metadata, logic) need none.
+
+- **Before = the base branch, served on its own port.** `git worktree add --detach <scratchpad>/before-main origin/main`, symlink this checkout's `node_modules` into it, copy `.env.development`, and run `npx next dev -p 3001` there; this branch stays on port 3000. Remove the worktree afterwards.
+- **Capture sections, not full pages.** Element screenshots (`agent-browser screenshot <selector>`) come out blank below the first viewport on this site. Instead, set the viewport to the section's height plus padding, scroll the section to the top, wait ~1.5 s for the scroll-in animation, then take a plain viewport screenshot. Use `set viewport <w> <h> 2` for sharp CJK text, and include a 375 px mobile shot when layout could wrap.
+- **Locating a section by text**: skip `<script>` elements. Next.js inlines the page payload in scripts, so a text search otherwise matches those first.
+- **`/sell` while signed out**: the page redirects to the login form client-side, but the guide is in the server HTML. Block scripts with `agent-browser network route "**/*" --abort --resource-type script` before opening it.
+- **Placement**: the formatter appends its marked block to the end of the body. To place it after `## Summary` and before `## Test plan`, first insert an empty `<!-- before-and-after:start -->` / `<!-- before-and-after:end -->` pair there; later runs replace the block in place.
+- Never commit the captures. Check that both images in a pair have the same pixel size and that no `./captures/` path remains in the published body.

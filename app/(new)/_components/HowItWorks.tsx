@@ -23,7 +23,7 @@ const sellerSteps: Step[] = [
     number: 1,
     type: "SELLER",
     title: "免費刊登（早鳥）",
-    desc: "5 分鐘填好店況、上傳照片。前 3 個月開站慶 0 元，當天上架。",
+    desc: "5 分鐘填好店況、上傳照片。開站慶 12/1 前 0 元，當天上架。",
   },
   {
     number: 2,
