@@ -32,8 +32,8 @@ function bannerMessages(launched: boolean): BannerMessage[] {
     {
       key: "early-bird",
       tag: "EARLY BIRD",
-      text: "開站慶 · 前 3 個月免費刊登",
-      shortText: "前 3 個月免費刊登",
+      text: "開站慶 · 12/1 前免費刊登",
+      shortText: "12/1 前免費刊登",
       linkLabel: "了解 →",
       href: "/sell",
     },

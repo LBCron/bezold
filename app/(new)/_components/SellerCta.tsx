@@ -25,14 +25,14 @@ export default function SellerCta() {
           <h3>
             想頂出你的店？
             <br />
-            <span className={styles.subline}>前 3 個月免費 · 早鳥限定</span>
+            <span className={styles.subline}>12/1 前免費 · 早鳥限定</span>
           </h3>
           <p>5 分鐘上架 · 開站慶免費刊登 · 買家直接聯絡你 · 永久不抽成交抽成</p>
         </div>
         <div className={styles.stats}>
           <div>
             <b>
-              3<small className={styles.unit}> 個月</small>
+              12/1<small className={styles.unit}> 前</small>
             </b>
             早鳥免費
           </div>
