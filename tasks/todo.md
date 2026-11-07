@@ -79,9 +79,9 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ## Checkpoint A: After Tasks 1–3
 
-- [ ] `npm run build` succeeds; sitemap trace contains blog sources
-- [ ] 404 noindex + footer link + lang verified locally
-- [ ] Local commit per task
+- [x] `npm run build` succeeds; sitemap trace contains blog sources
+- [x] 404 noindex + footer link + lang verified locally
+- [x] Local commit per task
 
 ## Task 4: `pickRelatedStores()` pure function + unit tests
 
@@ -89,14 +89,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] Same-city stores come first, topped up from same-category stores, no duplicates, max `limit`
-- [ ] Excludes the current store and anything not `APPROVED` or digital
-- [ ] Returns `[]` when nothing matches; stores without `city` or `category` skip that source
+- [x] Same-city stores come first, topped up from same-category stores, no duplicates, max `limit`
+- [x] Excludes the current store and anything not `APPROVED` or digital
+- [x] Returns `[]` when nothing matches; stores without `city` or `category` skip that source
 
 **Verification:**
 
-- [ ] `npm run test:unit` — new `tests/unit/relatedStores.test.ts` passes (written failing first)
-- [ ] Existing `storeCsv` tests still pass; eslint + prettier clean
+- [x] `npm run test:unit` — new `tests/unit/relatedStores.test.ts` passes (written failing first)
+- [x] Existing `storeCsv` tests still pass; eslint + prettier clean
 
 **Dependencies:** None
 
