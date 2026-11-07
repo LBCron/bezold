@@ -38,7 +38,7 @@ const physicalOnly = (stores: Store[]): Store[] =>
 // * resolve raw Storage paths to visible download URLs, mutating in place.
 // * coverOnly: list cards only show images[0], so skip resolving (and
 // * serializing) the rest — store.images becomes [coverUrl]
-const resolveStoreImages = async (
+export const resolveStoreImages = async (
   stores: Store[],
   { coverOnly = false }: { coverOnly?: boolean } = {},
 ): Promise<Store[]> => {
@@ -63,8 +63,8 @@ interface GetStoresOptions {
 }
 
 // * the store-list query without image signing, so callers that show only a
-// * few of the matches can sign just those
-const queryStores = async (
+// * few of the matches (related stores, one store-list page) sign just those
+export const queryStores = async (
   searchObj: Record<string, string>,
   statuses?: StoreStatus[],
 ): Promise<Store[]> => {

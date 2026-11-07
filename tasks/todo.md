@@ -29,8 +29,8 @@ Each task: acceptance criteria from the matching SPEC section · verify with `np
 ## store-list-paging (#106)
 
 - [x] **T10 Paging helpers + unit tests**: `parsePage`, `parseSort`, `sortStores`, `paginate`, `pageHref` in `utils/storeListPaging.ts`; tests first.
-- [ ] **T11 Pagination primitive**: `components/refactored/Pagination.tsx` + css; crawlable links, `aria-current`, hidden for 1 page.
-- [ ] **T12 /store-list on server paging**: server sorts + pages; `ResultsArea` gets one page of cards; sort dropdown pushes URL; SearchBar keeps sort, resets page; H3 titles; canonical/title for page > 1; out-of-range 404; ItemList for the current page. Verify: filters + sort + page combinations, SearchBar hydration, per-card byte estimate.
+- [x] **T11 Pagination primitive**: `components/refactored/Pagination.tsx` + css; crawlable links, `aria-current`, hidden for 1 page.
+- [x] **T12 /store-list on server paging**: server sorts + pages; `ResultsArea` gets one page of cards; sort dropdown pushes URL; SearchBar keeps sort, resets page; H3 titles; canonical/title for page > 1; out-of-range 404; ItemList for the current page. Verify: filters + sort + page combinations, SearchBar hydration, per-card byte estimate.
 
 ## ga-attribution (#101)
 
