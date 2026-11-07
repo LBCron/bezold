@@ -8,14 +8,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] Root cause written down with evidence (trace contents before/after, or the fallback's reason) for the PR description
-- [ ] After the fix, the sitemap route's trace (or bundle) includes the blog metadata source
-- [ ] Each blog URL keeps `lastModified` from `updatedAt`
+- [x] Root cause written down with evidence (trace contents before/after, or the fallback's reason) for the PR description
+- [x] After the fix, the sitemap route's trace (or bundle) includes the blog metadata source
+- [x] Each blog URL keeps `lastModified` from `updatedAt`
 
 **Verification:**
 
-- [ ] `npm run build` succeeds
-- [ ] `find .next/server/app -name '*.nft.json' -path '*sitemap*' -exec grep -l 'content/blog' {} \;` prints the sitemap trace (tracing route)
+- [x] `npm run build` succeeds
+- [x] `find .next/server/app -name '*.nft.json' -path '*sitemap*' -exec grep -l 'content/blog' {} \;` prints the sitemap trace (tracing route)
 - [ ] Final proof at Checkpoint B: preview deployment `curl -s <preview>/sitemap.xml | grep -c '/blog/'` → 6
 
 **Dependencies:** None
