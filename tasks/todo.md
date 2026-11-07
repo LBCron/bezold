@@ -34,7 +34,7 @@ Each task: acceptance criteria from the matching SPEC section · verify with `np
 
 ## ga-attribution (#101)
 
-- [ ] **T13 Rename `source` → `entry_point`**: 4 events + `docs/analytics-events.md`. Verify: grep shows no `trackEvent` with `source` / `medium` / `campaign` / `term` / `content`.
+- [x] **T13 Rename `source` → `entry_point`**: 4 events + `docs/analytics-events.md`. Verify: grep shows no `trackEvent` with `source` / `medium` / `campaign` / `term` / `content`.
 
 ## Checkpoint: Complete
 
