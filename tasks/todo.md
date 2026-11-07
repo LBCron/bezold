@@ -158,7 +158,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ## Checkpoint B: Complete
 
-- [ ] Every spec acceptance criterion met locally
-- [ ] `npm run test:unit`, `npm run build`, eslint, prettier clean
+- [x] Every spec acceptance criterion met locally
+- [x] `npm run test:unit`, `npm run build`, eslint, prettier clean
 - [ ] User reviews the local commits
 - [ ] With the user's OK: push branch → Vercel preview `sitemap.xml` has 6 `/blog/` URLs → open PR for #102 (`Closes #102`)
