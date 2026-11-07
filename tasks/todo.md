@@ -6,10 +6,10 @@ Each task: acceptance criteria from the matching SPEC section · verify with `np
 
 ## structured-data (#104)
 
-- [ ] **T1 JSON-LD builders + unit tests**: `faqPageJsonLd`, `breadcrumbJsonLd`, `itemListPageJsonLd` in `utils/structuredData.ts`; `tests/unit/structuredData.test.ts` written first. Files: 2.
-- [ ] **T2 /faq FAQPage**: `FaqItem` type requires `text` for JSX answers; page emits one FAQPage over all questions. Verify: JSON-LD parses; question count = Question count. Files: `faq/page.tsx`, `FaqCategory.tsx`.
-- [ ] **T3 Store BreadcrumbList**: every store page (physical / digital / sold) emits a breadcrumb that mirrors `StoreBreadcrumb`. Files: store `page.tsx`.
-- [ ] **T4 ItemList on /digital-assets and /blog**: CollectionPage + ItemList of absolute URLs in display order. Files: 2 pages.
+- [x] **T1 JSON-LD builders + unit tests**: `faqPageJsonLd`, `breadcrumbJsonLd`, `itemListPageJsonLd` in `utils/structuredData.ts`; `tests/unit/structuredData.test.ts` written first. Files: 2.
+- [x] **T2 /faq FAQPage**: `FaqItem` type requires `text` for JSX answers; page emits one FAQPage over all questions. Verify: JSON-LD parses; question count = Question count. Files: `faq/page.tsx`, `FaqCategory.tsx`.
+- [x] **T3 Store BreadcrumbList**: every store page (physical / digital / sold) emits a breadcrumb that mirrors `StoreBreadcrumb`. Files: store `page.tsx`.
+- [x] **T4 ItemList on /digital-assets and /blog**: CollectionPage + ItemList of absolute URLs in display order. Files: 2 pages.
 
 **Checkpoint A**: unit tests, tsc, lint clean; JSON-LD parses on /faq, a store page, /digital-assets, /blog.
 
