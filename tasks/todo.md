@@ -22,7 +22,7 @@ Each task: acceptance criteria from the matching SPEC section · verify with `np
 
 - [x] **T7 `/llms.txt`**: force-static route handler from `getAllPostsMeta()`. Verify: 200 `text/plain`, lists all 6 posts; build output marks it static.
 - [x] **T8 /about + /contact**: pages, footer links, sitemap entries, store-list 「聯絡我們」 → `/contact`. Verify: 200, screenshots desktop + mobile.
-- [ ] **T9 Organization contactPoint + address country**: home JSON-LD. Verify: parses.
+- [x] **T9 Organization contactPoint + address country**: home JSON-LD. Verify: parses.
 
 **Checkpoint B**: build passes; /sell signed-out char count; /llms.txt, /about, /contact return 200.
 
