@@ -8,14 +8,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] Title: 【頂讓】 or 【已頂讓】 + name + `｜{city}{district}{categoryLabel}店面頂讓`, with missing parts skipped cleanly
-- [ ] Description: facts sentence (sold variant without fee), then the emoji-free seller excerpt, ≤ 150 chars, `…` when cut, excerpt dropped when < 20 chars of space remain
-- [ ] Emoji, pictographs, variation selectors and ZWJ removed; CJK text and full-width punctuation kept
+- [x] Title: 【頂讓】 or 【已頂讓】 + name + `｜{city}{district}{categoryLabel}店面頂讓`, with missing parts skipped cleanly
+- [x] Description: facts sentence (sold variant without fee), then the emoji-free seller excerpt, ≤ 150 chars, `…` when cut, excerpt dropped when < 20 chars of space remain
+- [x] Emoji, pictographs, variation selectors and ZWJ removed; CJK text and full-width punctuation kept
 
 **Verification:**
 
-- [ ] `npm run test:unit` — `tests/unit/storeMeta.test.ts` written failing first, then passes; existing tests still pass
-- [ ] eslint + prettier clean
+- [x] `npm run test:unit` — `tests/unit/storeMeta.test.ts` written failing first, then passes; existing tests still pass
+- [x] eslint + prettier clean
 
 **Dependencies:** None
 
