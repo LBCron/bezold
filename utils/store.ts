@@ -152,9 +152,9 @@ export function digitalAssetToCard(store: Store): StoreCard {
     },
   ];
 
+  // * no image: digital-asset photos never reach a public card
   return {
     ribbon,
-    image: store.images?.[0],
     photoLabel: "數位資產",
     title: store.storeName,
     location: formatDigitalTypes(store.digitalTypes) || undefined,
@@ -236,11 +236,13 @@ const EMPTY_CONTACT: SellerContact = {
 
 // * assetUrl (admin-only) and verificationImages (admin/owner-only) go through
 // * the same gate — blanked when present, never added when absent. Digital
-// * assets are anonymous: even the seller's name is dropped.
+// * assets are anonymous: even the seller's name and photos are dropped.
 export function omitSellerContact(store: Store): Store {
   const publicStore = { ...store };
-  if (isDigitalAsset(store)) delete publicStore.userInfo;
-  else if (store.userInfo)
+  if (isDigitalAsset(store)) {
+    delete publicStore.userInfo;
+    publicStore.images = [];
+  } else if (store.userInfo)
     publicStore.userInfo = { ...store.userInfo, ...EMPTY_CONTACT };
   if (store.assetUrl !== undefined) publicStore.assetUrl = "";
   if (store.verificationImages !== undefined)

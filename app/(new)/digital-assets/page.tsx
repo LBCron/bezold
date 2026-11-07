@@ -55,7 +55,6 @@ export default async function DigitalAssetsPage({ searchParams }: PageProps) {
 
   const assets = await getDigitalAssets({
     statuses: [STORE_STATUS.APPROVED, STORE_STATUS.SOLD],
-    coverOnly: true,
   });
   const tabAssets = filterByDigitalAssetTab(assets, activeTab);
   const approvedAssets = tabAssets.filter(

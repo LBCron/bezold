@@ -279,7 +279,7 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
 
         <StoreImageUpload
           storeId={storeId}
-          heading={isDigital ? "封面照片" : "店面照片"}
+          heading={isDigital ? "照片（不公開）" : "店面照片"}
           headingBadge="獨立儲存"
           initialImages={existingImages}
           note="此區為獨立操作：照片一經上傳或刪除即立即生效並重新送審，不需按下方的「儲存變更」。"

@@ -207,8 +207,8 @@ export default function SellForm({
         <div className={styles.form}>
           <StoreImageUpload
             storeId={createdStoreId}
-            heading="上傳封面照片（選填）"
-            note="資產資料已送出！可上傳賣場、社群或網站的封面圖讓買家更了解，也可略過。請勿上傳含帳號或個資的畫面。"
+            heading="上傳照片（選填）"
+            note="資產資料已送出！可上傳賣場、社群或網站的畫面，僅供 Bezold 核對及付費買家查閱，不會公開顯示，也可略過。上傳前請遮住姓名、Email 等個資。"
           />
           <VerificationImageUpload
             storeId={createdStoreId}
