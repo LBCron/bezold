@@ -3,6 +3,8 @@ import { pageMetadata } from "@/utils/seo";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
+import JsonLd from "@/app/(new)/_components/JsonLd";
+import { itemListPageJsonLd } from "@/utils/structuredData";
 import DigitalAssetResults from "./_components/DigitalAssetResults";
 import DigitalAssetsTeaser from "./_components/DigitalAssetsTeaser";
 import { getDigitalAssets } from "@/firebase/serverUtils/store";
@@ -71,8 +73,17 @@ export default async function DigitalAssetsPage({ searchParams }: PageProps) {
     card: toCard(store),
   }));
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
   return (
     <>
+      <JsonLd
+        data={itemListPageJsonLd({
+          name: PAGE_TITLE,
+          url: `${appUrl}/digital-assets`,
+          itemUrls: results.map(({ id }) => `${appUrl}/store/${id}`),
+        })}
+      />
       <LaunchBanner />
       <SiteNav activeLink="數位資產" />
       <div className="flex-1">

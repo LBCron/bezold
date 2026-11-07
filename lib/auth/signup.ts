@@ -97,7 +97,7 @@ export async function signup({
     createTime: serverTimestamp(),
     updateTime: serverTimestamp(),
   });
-  trackEvent("sign_up", { method: "email", source });
+  trackEvent("sign_up", { method: "email", entry_point: source });
 
   let verificationSent = true;
   try {

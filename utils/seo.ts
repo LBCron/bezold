@@ -10,6 +10,7 @@ import {
   buildStoreTitle,
   toFeeFact,
 } from "@/utils/storeMeta";
+import { truncateText } from "@/utils/text";
 
 interface PageMetadataInput {
   title: string;
@@ -39,12 +40,8 @@ export const pageMetadata = ({
 });
 
 // * flatten line breaks and cap the length for <meta name="description">
-export const toMetaDescription = (text: string, maxLength = 120) => {
-  const flatText = text.replace(/\s+/g, " ").trim();
-  return flatText.length > maxLength
-    ? `${flatText.slice(0, maxLength - 1)}…`
-    : flatText;
-};
+export const toMetaDescription = (text: string, maxLength = 120) =>
+  truncateText(text.replace(/\s+/g, " ").trim(), maxLength);
 
 // * 其他 says nothing in a title — only real categories are named
 const categoryLabel = (category?: string) =>

@@ -85,6 +85,17 @@ export default async function NewHomePage() {
           description:
             "全台店面頂讓平台，提供店面頂讓、生意頂讓真實刊登，買賣雙方直接聯絡。",
           sameAs: Object.values(SOCIAL_LINKS),
+          // * only what's public on /contact — no street address, phone or
+          // * company ID until there are real ones to show
+          address: { "@type": "PostalAddress", addressCountry: "TW" },
+          contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "customer support",
+            email: CONTACT_EMAIL,
+            url: "https://line.me/ti/p/~bezoldtw",
+            areaServed: "TW",
+            availableLanguage: "zh-Hant",
+          },
         }}
       />
       <JsonLd

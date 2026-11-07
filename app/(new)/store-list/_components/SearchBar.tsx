@@ -70,6 +70,9 @@ export default function SearchBar() {
       if (max !== Number.POSITIVE_INFINITY)
         params.set("amountMax", String(max));
     }
+    // * a new filter starts again from page 1 but keeps the chosen sort
+    const sort = searchParams.get("sort");
+    if (sort) params.set("sort", sort);
     startTransition(() => {
       router.push(`/store-list?${params.toString()}`);
       // The App Router client cache is keyed by pathname, not searchParams, so
