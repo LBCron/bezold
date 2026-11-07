@@ -15,7 +15,7 @@ Each task: acceptance criteria from the matching SPEC section · verify with `np
 
 ## sell-content (#105)
 
-- [ ] **T5 /sell content + FAQPage**: steps, fees, rules, 5–8 FAQ, CTA, rendered outside the gate; signed-out body ≥ 800 CJK chars. Files: `sell/page.tsx`, new `sell/_components/SellGuide.tsx` (+ css).
+- [x] **T5 /sell content + FAQPage**: steps, fees, rules, 5–8 FAQ, CTA, rendered outside the gate; signed-out body ≥ 800 CJK chars. Files: `sell/page.tsx`, new `sell/_components/SellGuide.tsx` (+ css).
 - [ ] **T6 「頂讓」 anchor links**: homepage body → /store-guide, /store-guide → `/`. Files: one home section, `GuideCta.tsx`.
 
 ## trust-pages (#106)
