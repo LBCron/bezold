@@ -57,7 +57,7 @@ export default function SectionTitle({
           ))}
       </div>
       {more && (
-        <a className={styles.more} href={moreHref}>
+        <a className={cn(styles.more, dark && styles.moreDark)} href={moreHref}>
           {more}
         </a>
       )}
