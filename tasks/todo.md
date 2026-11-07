@@ -56,11 +56,11 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] The description's first sentence answers 「頂讓是什麼」; the title is unchanged
+- [x] The description's first sentence answers 「頂讓是什麼」; the title is unchanged
 
 **Verification:**
 
-- [ ] `curl -s localhost:3000/store-guide | grep -o '<meta name="description"[^>]*>'`
+- [x] `curl -s localhost:3000/store-guide | grep -o '<meta name="description"[^>]*>'`
 
 **Dependencies:** None
 
