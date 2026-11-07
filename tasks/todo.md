@@ -114,15 +114,15 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] Physical store page shows 4–6 related store cards linking to `/store/<id>`, never the current store
-- [ ] Section absent on digital-asset pages and when there are no matches
-- [ ] Served HTML of the section has no seller phone, LINE, Threads or email
+- [x] Physical store page shows 4–6 related store cards linking to `/store/<id>`, never the current store
+- [x] Section absent on digital-asset pages and when there are no matches
+- [x] Served HTML of the section has no seller phone, LINE, Threads or email
 
 **Verification:**
 
-- [ ] Browser preview: a store in a busy city (cards shown), a store with no matches (hidden), a 面議 store, a digital asset (hidden)
-- [ ] `curl -s localhost:3000/store/<id>` → no seller contact strings in the related cards
-- [ ] No new Firestore index error in the server logs; `npm run build` succeeds
+- [x] Browser preview: a store in a busy city (cards shown), a store with no matches (hidden), a 面議 store, a digital asset (hidden)
+- [x] `curl -s localhost:3000/store/<id>` → no seller contact strings in the related cards
+- [x] No new Firestore index error in the server logs; `npm run build` succeeds
 
 **Dependencies:** Task 4
 
