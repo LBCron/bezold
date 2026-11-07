@@ -2,6 +2,8 @@
 // * utils/seo.ts resolves a Store into these plain strings (category label,
 // * price wording, facts) before calling in.
 
+import { truncateText } from "./text.ts";
+
 const MAX_DESCRIPTION_LENGTH = 150;
 // * below this the excerpt is too short to say anything — leave it out
 const MIN_EXCERPT_LENGTH = 20;
@@ -13,9 +15,6 @@ const EMOJI_PATTERN =
 
 export const stripEmoji = (text: string) =>
   text.replace(EMOJI_PATTERN, "").replace(/\s+/g, " ").trim();
-
-const truncate = (text: string, maxLength: number) =>
-  text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
 
 export const buildPlaceLabel = ({
   city,
@@ -68,7 +67,7 @@ export const buildStoreDescription = ({
   const lead = isSold ? `${placeLabel}店面已頂讓成交` : `${placeLabel}店面頂讓`;
   const factList = facts.length > 0 ? `：${facts.join("、")}` : "";
   const locationClause = location ? `，位於${location}` : "";
-  const factsSentence = truncate(
+  const factsSentence = truncateText(
     `${lead}${factList}${locationClause}。`,
     MAX_DESCRIPTION_LENGTH,
   );
@@ -77,5 +76,5 @@ export const buildStoreDescription = ({
   const remaining = MAX_DESCRIPTION_LENGTH - factsSentence.length;
   if (!excerpt || remaining < MIN_EXCERPT_LENGTH) return factsSentence;
 
-  return `${factsSentence}${truncate(excerpt, remaining)}`;
+  return `${factsSentence}${truncateText(excerpt, remaining)}`;
 };
