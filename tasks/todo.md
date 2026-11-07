@@ -72,6 +72,6 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ## Checkpoint: Complete
 
-- [ ] `npm run test:unit`, `tsc`, eslint, `npm run build` clean
+- [x] `npm run test:unit`, `tsc`, eslint, `npm run build` clean
 - [ ] You review the local commits
 - [ ] With your OK: push → PR for #103 (`Refs #103`)
