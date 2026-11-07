@@ -32,14 +32,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria:**
 
-- [ ] Physical store pages render the template title and description in `<title>`, `meta description`, `og:title`, `og:description`
-- [ ] Digital-asset pages are unchanged
-- [ ] No other caller of the changed helpers breaks
+- [x] Physical store pages render the template title and description in `<title>`, `meta description`, `og:title`, `og:description`
+- [x] Digital-asset pages are unchanged
+- [x] No other caller of the changed helpers breaks
 
 **Verification:**
 
-- [ ] `tsc --noEmit` clean
-- [ ] Dev server: curl a priced, a 面議, a 免頂讓金, a sold (if mock has one) and a digital store; title, description and og tags match the spec
+- [x] `tsc --noEmit` clean
+- [x] Dev server: curl a priced, a 面議, a 免頂讓金, a sold (if mock has one) and a digital store; title, description and og tags match the spec
 
 **Dependencies:** Task 1
 

@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import { getRelatedStores, getStoreById } from "@/firebase/serverUtils";
 import { STORE_STATUS, type StoreStatus } from "@/types";
 import { BASE_OPEN_GRAPH } from "@/constant/seo";
-import { storeOffer, storePageTitle, toMetaDescription } from "@/utils/seo";
+import {
+  storeOffer,
+  storePageDescription,
+  storePageTitle,
+  toMetaDescription,
+} from "@/utils/seo";
 import { isDigitalAsset, omitSellerContact } from "@/utils/store";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
@@ -51,10 +56,11 @@ export async function generateMetadata(
   if (!store) notFound();
 
   const storeTitle = storePageTitle(store);
+  const storeDescription = storePageDescription(store);
 
   return {
     title: storeTitle,
-    description: toMetaDescription(store.description),
+    description: storeDescription,
     ...(!INDEXABLE_STATUSES.includes(store.status)
       ? { robots: { index: false, follow: false } }
       : {}),
@@ -64,7 +70,10 @@ export async function generateMetadata(
     openGraph: {
       ...BASE_OPEN_GRAPH,
       title: storeTitle,
-      description: toMetaDescription(store.description, 200),
+      // * digital assets keep their longer share-card excerpt
+      description: isDigitalAsset(store)
+        ? toMetaDescription(store.description, 200)
+        : storeDescription,
       url: canonicalUrl,
       images: store.images.length ? store.images : [...BASE_OPEN_GRAPH.images],
     },
