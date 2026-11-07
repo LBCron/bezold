@@ -46,7 +46,7 @@ const Footer = () => {
         {/* Social Media Icons */}
         <div className="flex gap-4">
           <a
-            href="https://www.instagram.com/bezold.tw?igsh=enVjMDUwZWh3dnJy&utm_source=qr"
+            href="https://www.instagram.com/bezoldtw/"
             className="hover:text-gray-300"
             aria-label="Instagram"
             target="_blank"
@@ -86,7 +86,7 @@ const Footer = () => {
             <LinkedinFilled className="text-2xl" />
           </a>
           <a
-            href="https://www.threads.com/@bezold.tw?igshid=NTc4MTIwNjQ2YQ=="
+            href="https://www.threads.com/@bezoldtw"
             className="hover:text-gray-300"
             aria-label="Threads"
             target="_blank"
